@@ -4,9 +4,31 @@ import { useProdutos } from '@/hooks/useProdutos';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
-import { Search, Eye } from 'lucide-react';
+import { Search, Eye, Pencil, Trash2, Info, Layers, DollarSign, Calendar, Tag, FileText, CheckCircle2, XCircle, Package } from 'lucide-react';
 import { NovoProdutoSheet } from '@/components/produtos/NovoProdutoSheet';
+import { EditarProdutoSheet } from '@/components/produtos/EditarProdutoSheet';
 import Link from 'next/link';
+import { doc, deleteDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase/config';
+import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import {
   Table,
   TableHeader,
@@ -20,6 +42,42 @@ export default function ProdutosPage() {
   const { produtos, carregando } = useProdutos();
   const [busca, setBusca] = useState('');
 
+  // State for View Details
+  const [detalhesProduto, setDetalhesProduto] = useState<any>(null);
+
+  // State for Edit Product
+  const [editandoProduto, setEditandoProduto] = useState<any>(null);
+
+  // State for Delete Product
+  const [excluindoProduto, setExcluindoProduto] = useState<any>(null);
+  const [excluindo, setExcluindo] = useState(false);
+
+  // Handle Confirm Delete
+  const handleConfirmDelete = async () => {
+    if (!excluindoProduto) return;
+    setExcluindo(true);
+    try {
+      const docRef = doc(db, 'produtos', excluindoProduto.id);
+      await deleteDoc(docRef);
+      toast.success('Produto excluído com sucesso!');
+      setExcluindoProduto(null);
+    } catch (error) {
+      console.error('Erro ao excluir produto:', error);
+      toast.error('Erro ao excluir o produto.');
+    } finally {
+      setExcluindo(false);
+    }
+  };
+
+  // Format date helper
+  const formatDate = (criadoEm: any) => {
+    if (!criadoEm) return '-';
+    if (criadoEm.seconds) {
+      return new Date(criadoEm.seconds * 1000).toLocaleDateString('pt-BR') + ' às ' + new Date(criadoEm.seconds * 1000).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    }
+    return new Date(criadoEm).toLocaleDateString('pt-BR');
+  };
+
   if (carregando) {
     return <div className="space-y-4"><Skeleton className="h-[400px] w-full rounded-xl" /></div>;
   }
@@ -29,7 +87,7 @@ export default function ProdutosPage() {
   );
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 py-12">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Produtos</h2>
@@ -91,19 +149,38 @@ export default function ProdutosPage() {
                       {produto.ativo !== false ? 'Ativo' : 'Inativo'}
                     </span>
                   </TableCell>
-                  <TableCell className="text-right pr-6">
-                    <div className="flex items-center justify-end gap-2">
-                      <Link href={`/produtos/${produto.id}`}>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          title="Visualizar Produto"
-                          className="h-8 w-8 text-zinc-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40"
-                        >
-                          <Eye className="h-4 w-4" />
-                          <span className="sr-only">Ver</span>
-                        </Button>
-                      </Link>
+                  <TableCell className="text-right pr-6" id={`produto-actions-${produto.id}`}>
+                    <div className="flex items-center justify-end gap-1.5">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="Detalhes do Produto"
+                        onClick={() => setDetalhesProduto(produto)}
+                        className="h-8 w-8 text-zinc-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40"
+                      >
+                        <Eye className="h-4 w-4" />
+                        <span className="sr-only">Detalhes</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="Editar Produto"
+                        onClick={() => setEditandoProduto(produto)}
+                        className="h-8 w-8 text-zinc-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/40"
+                      >
+                        <Pencil className="h-4 w-4" />
+                        <span className="sr-only">Editar</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="Excluir Produto"
+                        onClick={() => setExcluindoProduto(produto)}
+                        className="h-8 w-8 text-zinc-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Excluir</span>
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -112,6 +189,140 @@ export default function ProdutosPage() {
           </Table>
         )}
       </div>
+
+      {/* Detalhes do Produto Dialog */}
+      <Dialog open={!!detalhesProduto} onOpenChange={(open) => !open && setDetalhesProduto(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold flex items-center gap-2">
+              <span>Detalhes do Produto</span>
+            </DialogTitle>
+            <DialogDescription>
+              Informações completas do produto cadastrado.
+            </DialogDescription>
+          </DialogHeader>
+
+          {detalhesProduto && (
+            <div className="space-y-4 py-2">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block">Código / SKU</span>
+                  <span className="font-mono text-xs text-zinc-900 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-900 px-2 py-1 rounded border border-zinc-200/50 dark:border-zinc-800/50 inline-block">
+                    {detalhesProduto.codigoInterno || '-'}
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block">Status</span>
+                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium ${
+                    detalhesProduto.ativo !== false
+                      ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200/50'
+                      : 'bg-zinc-100 text-zinc-550 dark:bg-zinc-800 dark:text-zinc-400 border border-zinc-200/50'
+                  }`}>
+                    {detalhesProduto.ativo !== false ? (
+                      <>
+                        <CheckCircle2 className="h-3 w-3" />
+                        <span>Ativo</span>
+                      </>
+                    ) : (
+                      <>
+                        <XCircle className="h-3 w-3" />
+                        <span>Inativo</span>
+                      </>
+                    )}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-1 border-t pt-3 border-zinc-100 dark:border-zinc-900">
+                <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block">Nome do Produto</span>
+                <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100 block">
+                  {detalhesProduto.nome}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 border-t pt-3 border-zinc-100 dark:border-zinc-900">
+                <div className="space-y-1">
+                  <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block">Preço Unitário</span>
+                  <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 font-mono">
+                    R$ {Number(detalhesProduto.precoUnitario || 0).toFixed(2)}
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block">Unidade de Medida</span>
+                  <span className="text-sm text-zinc-700 dark:text-zinc-300">
+                    {detalhesProduto.unidade}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 border-t pt-3 border-zinc-100 dark:border-zinc-900">
+                <div className="space-y-1">
+                  <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block">Estoque</span>
+                  <span className={`text-sm font-semibold ${
+                    (detalhesProduto.estoque || 0) === 0 
+                      ? 'text-rose-500 font-bold' 
+                      : (detalhesProduto.estoque || 0) < 5 
+                        ? 'text-amber-500' 
+                        : 'text-zinc-700 dark:text-zinc-300'
+                  }`}>
+                    {detalhesProduto.estoque ?? 0}
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block">Valor em Estoque</span>
+                  <span className="text-sm font-mono text-zinc-700 dark:text-zinc-300">
+                    R$ {((detalhesProduto.estoque ?? 0) * (detalhesProduto.precoUnitario || 0)).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-1 border-t pt-3 border-zinc-100 dark:border-zinc-900">
+                <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block">Descrição / Notas</span>
+                <p className="text-xs text-zinc-600 dark:text-zinc-450 bg-zinc-50 dark:bg-zinc-900/40 p-2 rounded border border-zinc-100 dark:border-zinc-900/60 leading-relaxed whitespace-pre-wrap">
+                  {detalhesProduto.descricao || 'Sem descrição cadastrada.'}
+                </p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Editar Produto Sheet */}
+      <EditarProdutoSheet
+        produto={editandoProduto}
+        open={!!editandoProduto}
+        onOpenChange={(open) => !open && setEditandoProduto(null)}
+      />
+
+      {/* Excluir Produto Confirmation Dialog */}
+      <AlertDialog open={!!excluindoProduto} onOpenChange={(open) => !open && setExcluindoProduto(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg font-bold flex items-center gap-2 text-rose-600 dark:text-rose-400">
+              <Trash2 className="h-5 w-5" />
+              <span>Confirmar Exclusão</span>
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-zinc-600 dark:text-zinc-400 mt-2">
+              Tem certeza que deseja excluir o produto <strong className="text-zinc-900 dark:text-zinc-100">"{excluindoProduto?.nome}"</strong>?
+              <br />
+              Esta ação é permanente e removerá o produto de todo o catálogo.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4">
+            <AlertDialogCancel disabled={excluindo}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                handleConfirmDelete();
+              }}
+              disabled={excluindo}
+              className="bg-rose-600 text-white hover:bg-rose-700 dark:bg-rose-900 dark:hover:bg-rose-800"
+            >
+              {excluindo ? 'Excluindo...' : 'Confirmar Exclusão'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
