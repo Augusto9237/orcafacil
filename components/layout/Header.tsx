@@ -18,7 +18,7 @@ export function Header({ toggleSidebar }: { toggleSidebar: () => void }) {
   const { theme, setTheme } = useTheme();
 
   return (
-    <header className="fixed top-0 z-50 flex h-16 w-full items-center justify-between border-b bg-background/50 px-4 md:px-6 backdrop-blur-sm">
+    <header className="fixed top-0 left-0 right-0 flex h-16 w-full items-center justify-between border-b bg-background/50 px-4 md:px-6 backdrop-blur-sm">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleSidebar}>
           <Menu className="h-5 w-5" />
