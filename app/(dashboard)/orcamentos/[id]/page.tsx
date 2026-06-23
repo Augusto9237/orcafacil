@@ -230,7 +230,7 @@ export default function OrcamentoDetalhesPage() {
               Informações do Cliente
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-2">
               <div>
                 <p className="text-xs text-muted-foreground">Nome completo / Razão Social</p>
                 <p className="font-semibold text-gray-900 dark:text-zinc-100">{orcamento.cliente.nome}</p>

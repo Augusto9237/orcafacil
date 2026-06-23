@@ -38,11 +38,13 @@ export default function OrcamentosPage() {
     const termo = busca.toLowerCase();
     const numero = orcamento.numero || '';
     const clienteNome = orcamento.cliente?.nome || '';
+    const clienteCpfCnpj = orcamento.cliente?.cpfCnpj || '';
     const status = orcamento.status || '';
     
     return (
       numero.toLowerCase().includes(termo) ||
       clienteNome.toLowerCase().includes(termo) ||
+      clienteCpfCnpj.toLowerCase().includes(termo) ||
       status.toLowerCase().includes(termo)
     );
   });
@@ -127,6 +129,7 @@ export default function OrcamentosPage() {
               <TableRow>
                 <TableHead className="w-[120px] font-semibold">Número</TableHead>
                 <TableHead className="font-semibold">Cliente</TableHead>
+                <TableHead className="font-semibold">CPF/CNPJ</TableHead>
                 <TableHead className="font-semibold">Data</TableHead>
                 <TableHead className="font-semibold">Total</TableHead>
                 <TableHead className="font-semibold">Status</TableHead>
@@ -141,6 +144,9 @@ export default function OrcamentosPage() {
                   </TableCell>
                   <TableCell className="font-medium text-zinc-900 dark:text-zinc-100">
                     {orcamento.cliente.nome}
+                  </TableCell>
+                  <TableCell className="text-zinc-550 dark:text-zinc-400 font-mono text-xs">
+                    {orcamento.cliente.cpfCnpj || '—'}
                   </TableCell>
                   <TableCell className="text-zinc-550 dark:text-zinc-400">
                     {formatDate(orcamento.criadoEm)}

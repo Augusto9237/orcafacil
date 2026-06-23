@@ -25,7 +25,7 @@ export default function ConfiguracoesPage() {
   const [telefone, setTelefone] = useState('');
   const [endereco, setEndereco] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
-  const [corTema, setCorTema] = useState('padrao');
+  const [corTema, setCorTema] = useState('zinc');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -35,7 +35,9 @@ export default function ConfiguracoesPage() {
       setTelefone(perfil.telefone || '');
       setEndereco(perfil.endereco || '');
       setLogoUrl(perfil.logoUrl || '');
-      setCorTema(perfil.corTema || 'padrao');
+      
+      const temaAtual = perfil.corTema || 'zinc';
+      setCorTema(temaAtual === 'padrao' ? 'zinc' : temaAtual);
     }
   }, [perfil]);
 

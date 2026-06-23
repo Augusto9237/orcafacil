@@ -8,6 +8,7 @@ import { Users, FileText, ClipboardList, TrendingUp, FilePlus } from 'lucide-rea
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
+import { Progress } from '@/components/ui/progress';
 
 export default function DashboardPage() {
   const { orcamentos, carregando: cOrçamentos } = useOrcamentos();
@@ -16,7 +17,7 @@ export default function DashboardPage() {
 
   const loading = cOrçamentos || cOS || cClientes;
 
-  const totalOrcamentosAprovados = orcamentos.filter(o => o.status === 'aprovado').reduce((acc, curr) => acc + curr.total, 0);
+  const totalOrcamentosAprovados = orcamentos.filter(o => o.status === 'aprovado').reduce((acc, curr) => acc + (curr.total || 0), 0);
   const osAbertas = ordensDeServico.filter(o => o.status === 'aberta' || o.status === 'em_andamento').length;
 
   // Helper robusto para extrair objetos de data do Firestore (Timestamp ou Date ou ISO)
@@ -76,13 +77,13 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex-1 space-y-6 h-full p-0.5 pt-10 pb-5">
+    <div className="flex-1 space-y-6 h-full p-0.5 pt-12 pb-10">
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
       </div>
 
       {/* Ações Rápidas de Acesso */}
-      <Card className="border border-blue-100/60 dark:border-blue-900/30 bg-gradient-to-r from-blue-50/60 via-zinc-50/50 to-indigo-50/50 dark:from-blue-950/15 dark:via-zinc-950/10 dark:to-indigo-950/15 shadow-sm">
+      <Card className="border border-primary/60 dark:border-primary/30 bg-gradient-to-r from-primary/40 via-background/50 dark:from-primary/15 dark:via-zinc-950/10 dark:to-indigo-950/15 shadow-sm">
         <CardContent className="">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1 font-sans">
@@ -148,7 +149,7 @@ export default function DashboardPage() {
         <Card className="col-span-4">
           <CardHeader>
             <CardTitle>Visão Geral de Orçamentos</CardTitle>
-            <CardDescription>Valor mensal acumulado de orçamentos ativos (rascunhos, enviados e aprovados)</CardDescription>
+            <CardDescription className="text-xs">Valor mensal acumulado de orçamentos ativos (rascunhos, enviados e aprovados)</CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
             <ResponsiveContainer width="100%" height={350}>
@@ -175,7 +176,7 @@ export default function DashboardPage() {
         <Card className="col-span-3">
           <CardHeader>
             <CardTitle>Resumo por Categoria</CardTitle>
-            <CardDescription>Distribuição financeira por situação dos orçamentos</CardDescription>
+            <CardDescription className="text-xs">Distribuição financeira por situação dos orçamentos</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -183,38 +184,31 @@ export default function DashboardPage() {
                 <span className="font-semibold text-emerald-600 dark:text-emerald-400">Aprovados ({aprovadosCount})</span>
                 <span className="font-mono font-bold text-zinc-950 dark:text-zinc-50">R$ {aprovadosTotal.toFixed(2)}</span>
               </div>
-              <div className="h-2 w-full rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
-                <div 
-                  className="h-full bg-emerald-500 rounded-full transition-all" 
-                  style={{ width: `${totalAtivo > 0 ? (aprovadosTotal / totalAtivo) * 100 : 0}%` }}
-                />
-              </div>
+              <Progress 
+                value={totalAtivo > 0 ? (aprovadosTotal / totalAtivo) * 100 : 0} 
+                indicatorClassName="bg-emerald-600 dark:bg-emerald-400"
+              />
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="font-semibold text-blue-600 dark:text-blue-400">Enviados ({enviadosCount})</span>
+                <span className="font-semibold text-primary dark:text-primary">Enviados ({enviadosCount})</span>
                 <span className="font-mono font-bold text-zinc-950 dark:text-zinc-50">R$ {enviadosTotal.toFixed(2)}</span>
               </div>
-              <div className="h-2 w-full rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
-                <div 
-                  className="h-full bg-blue-500 rounded-full transition-all" 
-                  style={{ width: `${totalAtivo > 0 ? (enviadosTotal / totalAtivo) * 100 : 0}%` }}
-                />
-              </div>
+              <Progress 
+                value={totalAtivo > 0 ? (enviadosTotal / totalAtivo) * 100 : 0} 
+              />
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="font-semibold text-zinc-500 dark:text-zinc-400">Rascunhos ({rascunhosCount})</span>
-                <span className="font-mono font-bold text-zinc-950 dark:text-zinc-50">R$ {rascunhosTotal.toFixed(2)}</span>
+                <span className="font-mono font-bold">R$ {rascunhosTotal.toFixed(2)}</span>
               </div>
-              <div className="h-2 w-full rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
-                <div 
-                  className="h-full bg-zinc-400 rounded-full transition-all" 
-                  style={{ width: `${totalAtivo > 0 ? (rascunhosTotal / totalAtivo) * 100 : 0}%` }}
-                />
-              </div>
+              <Progress 
+                value={totalAtivo > 0 ? (rascunhosTotal / totalAtivo) * 100 : 0} 
+                indicatorClassName="bg-zinc-400 dark:bg-zinc-500"
+              />
             </div>
 
             <div className="pt-2 border-t border-dashed flex justify-between items-center text-xs text-muted-foreground">
