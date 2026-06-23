@@ -1,0 +1,217 @@
+'use client';
+import { useState } from 'react';
+import { useOrcamentos } from '@/hooks/useOrcamentos';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
+import Link from 'next/link';
+import { Eye, Pencil, Trash2, Search } from 'lucide-react';
+import { doc, deleteDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase/config';
+import { toast } from 'sonner';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@/components/ui/table';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+
+export default function OrcamentosPage() {
+  const { orcamentos, carregando } = useOrcamentos();
+  const [busca, setBusca] = useState('');
+  const [deletandoId, setDeletandoId] = useState<string | null>(null);
+  const [deletandoNumero, setDeletandoNumero] = useState<string>('');
+
+  const orcamentosFiltrados = orcamentos.filter((orcamento) => {
+    const termo = busca.toLowerCase();
+    const numero = orcamento.numero || '';
+    const clienteNome = orcamento.cliente?.nome || '';
+    const status = orcamento.status || '';
+    
+    return (
+      numero.toLowerCase().includes(termo) ||
+      clienteNome.toLowerCase().includes(termo) ||
+      status.toLowerCase().includes(termo)
+    );
+  });
+
+  const handleDelete = (id: string, numero: string) => {
+    setDeletandoId(id);
+    setDeletandoNumero(numero);
+  };
+
+  const confirmDelete = async () => {
+    if (!deletandoId) return;
+    try {
+      await deleteDoc(doc(db, 'orcamentos', deletandoId));
+      toast.success('Orçamento excluído com sucesso!');
+    } catch (err) {
+      console.error('Erro ao excluir orçamento:', err);
+      toast.error('Erro ao excluir orçamento.');
+    } finally {
+      setDeletandoId(null);
+      setDeletandoNumero('');
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    const configs: Record<string, { label: string; classes: string }> = {
+      rascunho: { label: 'Rascunho', classes: 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300' },
+      enviado: { label: 'Enviado', classes: 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-200/50 dark:border-blue-900/30' },
+      aprovado: { label: 'Aprovado', classes: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-950/30' },
+      rejeitado: { label: 'Rejeitado', classes: 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border border-rose-200/50 dark:border-rose-950/30' },
+      cancelado: { label: 'Cancelado', classes: 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200/50 dark:border-amber-950/30' },
+    };
+    const config = configs[status] || { label: status, classes: 'bg-zinc-100 text-zinc-800' };
+    return (
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${config.classes}`}>
+        {config.label}
+      </span>
+    );
+  };
+
+  const formatDate = (criadoEm: any) => {
+    if (!criadoEm) return '-';
+    if (criadoEm.seconds) {
+      return new Date(criadoEm.seconds * 1000).toLocaleDateString('pt-BR');
+    }
+    return new Date(criadoEm).toLocaleDateString('pt-BR');
+  };
+
+  if (carregando) {
+    return <div className="space-y-4"><Skeleton className="h-[400px] w-full rounded-xl" /></div>;
+  }
+
+  return (
+    <div id="orcamentos-container" className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Orçamentos</h2>
+          <p className="text-muted-foreground">Gerencie seus orçamentos e propostas comerciais.</p>
+        </div>
+        <Link href="/orcamentos/novo">
+          <Button className="font-semibold">Novo Orçamento</Button>
+        </Link>
+      </div>
+
+      <div className="relative">
+        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Pesquisar orçamento por número, cliente ou status..."
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+          className="pl-9 max-w-sm bg-white dark:bg-zinc-950"
+        />
+      </div>
+
+      <div className="rounded-md border bg-white shadow-sm dark:bg-zinc-950 overflow-hidden">
+        {orcamentos.length === 0 ? (
+          <p className="text-center text-muted-foreground py-12">Nenhum orçamento criado.</p>
+        ) : orcamentosFiltrados.length === 0 ? (
+          <p className="text-center text-muted-foreground py-12">Nenhum orçamento encontrado para "{busca}".</p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[120px] font-semibold">Número</TableHead>
+                <TableHead className="font-semibold">Cliente</TableHead>
+                <TableHead className="font-semibold">Data</TableHead>
+                <TableHead className="font-semibold">Total</TableHead>
+                <TableHead className="font-semibold">Status</TableHead>
+                <TableHead className="text-right font-semibold pr-6">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {orcamentosFiltrados.map((orcamento) => (
+                <TableRow key={orcamento.id} className="group hover:bg-zinc-50/50 dark:hover:bg-zinc-900/50">
+                  <TableCell className="font-mono font-medium text-blue-600 dark:text-blue-400">
+                    {orcamento.numero}
+                  </TableCell>
+                  <TableCell className="font-medium text-zinc-900 dark:text-zinc-100">
+                    {orcamento.cliente.nome}
+                  </TableCell>
+                  <TableCell className="text-zinc-550 dark:text-zinc-400">
+                    {formatDate(orcamento.criadoEm)}
+                  </TableCell>
+                  <TableCell className="font-medium font-mono text-zinc-900 dark:text-zinc-100">
+                    R$ {orcamento.total.toFixed(2)}
+                  </TableCell>
+                  <TableCell>
+                    {getStatusBadge(orcamento.status)}
+                  </TableCell>
+                  <TableCell className="text-right pr-6">
+                    <div className="flex items-center justify-end gap-2">
+                      <Link href={`/orcamentos/${orcamento.id}`}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Visualizar Orçamento"
+                          className="h-8 w-8 text-zinc-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40"
+                        >
+                          <Eye className="h-4 w-4" />
+                          <span className="sr-only">Ver</span>
+                        </Button>
+                      </Link>
+                      
+                      <Link href={`/orcamentos/novo?edit=${orcamento.id}`}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Editar Orçamento"
+                          className="h-8 w-8 text-zinc-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/40"
+                        >
+                          <Pencil className="h-4 w-4" />
+                          <span className="sr-only">Editar</span>
+                        </Button>
+                      </Link>
+
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="Deletar Orçamento"
+                        onClick={() => handleDelete(orcamento.id, orcamento.numero)}
+                        className="h-8 w-8 text-zinc-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Excluir</span>
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </div>
+
+      <AlertDialog open={!!deletandoId} onOpenChange={(open) => !open && setDeletandoId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir Orçamento</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir o orçamento <strong className="font-semibold text-zinc-900 dark:text-zinc-50">{deletandoNumero}</strong>? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-650 hover:bg-red-700 text-white dark:bg-red-600 dark:hover:bg-red-700">
+              Excluir Orçamento
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}

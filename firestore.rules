@@ -1,0 +1,41 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    match /usuarios/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    match /clientes/{docId} {
+      allow read, write: if isOwner(resource.data.usuarioId)
+        || (request.auth != null && request.resource.data.usuarioId == request.auth.uid);
+    }
+
+    match /produtos/{docId} {
+      allow read, write: if isOwner(resource.data.usuarioId)
+        || (request.auth != null && request.resource.data.usuarioId == request.auth.uid);
+    }
+
+    match /servicos/{docId} {
+      allow read, write: if isOwner(resource.data.usuarioId)
+        || (request.auth != null && request.resource.data.usuarioId == request.auth.uid);
+    }
+
+    match /orcamentos/{docId} {
+      allow read, write: if isOwner(resource.data.usuarioId)
+        || (request.auth != null && request.resource.data.usuarioId == request.auth.uid);
+    }
+
+    match /ordensDeServico/{docId} {
+      allow read, write: if isOwner(resource.data.usuarioId)
+        || (request.auth != null && request.resource.data.usuarioId == request.auth.uid);
+    }
+
+    match /contadores/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+  }
+}

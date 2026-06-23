@@ -1,0 +1,50 @@
+{
+  "rules": [
+    {
+      "collection": "usuarios",
+      "path": "/usuarios/{userId}",
+      "read": "isOwner(userId)",
+      "write": "isOwner(userId)"
+    },
+    {
+      "collection": "clientes",
+      "path": "/clientes/{docId}",
+      "read": "isOwner(resource.data.usuarioId) || (request.auth != null && request.resource.data.usuarioId == request.auth.uid)",
+      "write": "isOwner(resource.data.usuarioId) || (request.auth != null && request.resource.data.usuarioId == request.auth.uid)"
+    },
+    {
+      "collection": "produtos",
+      "path": "/produtos/{docId}",
+      "read": "isOwner(resource.data.usuarioId) || (request.auth != null && request.resource.data.usuarioId == request.auth.uid)",
+      "write": "isOwner(resource.data.usuarioId) || (request.auth != null && request.resource.data.usuarioId == request.auth.uid)"
+    },
+    {
+      "collection": "servicos",
+      "path": "/servicos/{docId}",
+      "read": "isOwner(resource.data.usuarioId) || (request.auth != null && request.resource.data.usuarioId == request.auth.uid)",
+      "write": "isOwner(resource.data.usuarioId) || (request.auth != null && request.resource.data.usuarioId == request.auth.uid)"
+    },
+    {
+      "collection": "orcamentos",
+      "path": "/orcamentos/{docId}",
+      "read": "isOwner(resource.data.usuarioId) || (request.auth != null && request.resource.data.usuarioId == request.auth.uid)",
+      "write": "isOwner(resource.data.usuarioId) || (request.auth != null && request.resource.data.usuarioId == request.auth.uid)"
+    },
+    {
+      "collection": "ordensDeServico",
+      "path": "/ordensDeServico/{docId}",
+      "read": "isOwner(resource.data.usuarioId) || (request.auth != null && request.resource.data.usuarioId == request.auth.uid)",
+      "write": "isOwner(resource.data.usuarioId) || (request.auth != null && request.resource.data.usuarioId == request.auth.uid)"
+    },
+    {
+      "collection": "contadores",
+      "path": "/contadores/{userId}",
+      "read": "isOwner(userId)",
+      "write": "isOwner(userId)"
+    }
+  ],
+  "customRules": [
+    "function isOwner(userId) { return request.auth != null && request.auth.uid == userId; }"
+  ],
+  "indexes": []
+}
