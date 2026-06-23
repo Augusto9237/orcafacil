@@ -320,7 +320,7 @@ function NovoOrcamentoPageContent() {
   };
 
   return (
-    <div className="space-y-6 overflow-hidden max-h-screen min-h-0">
+    <div className="space-y-6 overflow-hidden max-h-screen min-h-0 py-12">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-5">
         <div className="flex items-center gap-3">
@@ -352,7 +352,7 @@ function NovoOrcamentoPageContent() {
                 Salvando
               </>
             ) : (
-              'Salvar Proposta'
+              'Salvar'
             )}
           </Button>
         </div>
