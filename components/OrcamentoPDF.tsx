@@ -4,334 +4,256 @@ import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Svg, Path, Rect, Image } from '@react-pdf/renderer';
 import type { Orcamento, Usuario } from '@/types';
 
-// Define layout style rules based on reference model (black and white printable grid layout)
+// Define beautiful modern layout styles matching the client-side UI
 const styles = StyleSheet.create({
   page: {
     fontFamily: 'Helvetica',
-    fontSize: 8.5,
-    lineHeight: 1.3,
-    paddingTop: 25,
+    fontSize: 9,
+    lineHeight: 1.4,
+    paddingTop: 35,
     paddingHorizontal: 40,
-    paddingBottom: 40,
-    color: '#000000',
+    paddingBottom: 45,
+    color: '#18181b', // zinc-900 equivalent
+    backgroundColor: '#ffffff',
   },
-  // Top metadata right aligned
-  topMetaContainer: {
-    alignItems: 'flex-end',
-    marginBottom: 5,
-  },
-  topPageNum: {
-    fontSize: 8,
-    fontFamily: 'Helvetica-Bold',
-  },
-  topDocNumber: {
-    fontSize: 8,
-    marginTop: 2,
-  },
-  // Header section (logo left, info centered)
-  headerContainer: {
+  // Header with Logo and Company Info
+  headerSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-    paddingBottom: 10,
+    alignItems: 'flex-start',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e4e4e7', // zinc-200
+    paddingBottom: 15,
+    marginBottom: 20,
   },
   logoContainer: {
-    width: '25%',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    width: '35%',
   },
   logoImage: {
-    width: 60,
-    height: 40,
+    width: 85,
+    height: 45,
     objectFit: 'contain',
   },
-  logoBrandText: {
-    fontSize: 10,
+  logoFallbackText: {
+    fontSize: 16,
     fontFamily: 'Helvetica-Bold',
-    marginTop: 3,
-    textAlign: 'center',
+    color: '#2563eb', // primary blue
+    textTransform: 'uppercase',
   },
   logoSubtext: {
-    fontSize: 5.5,
-    color: '#555555',
-    textAlign: 'center',
-    marginTop: 1,
+    fontSize: 7,
+    color: '#71717a',
+    marginTop: 2,
   },
-  companyDetailsCentered: {
-    width: '75%',
-    textAlign: 'center',
-    paddingRight: 20,
+  companyDetails: {
+    width: '60%',
+    textAlign: 'right',
+    fontSize: 8,
+    color: '#71717a', // zinc-500
   },
   companyName: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: 'Helvetica-Bold',
+    color: '#18181b',
     marginBottom: 4,
   },
   companySub: {
     fontSize: 8,
+    color: '#52525b',
     marginBottom: 2,
   },
-  // Title
-  documentTitleContainer: {
-    alignItems: 'center',
-    marginVertical: 10,
-  },
-  documentTitleText: {
-    fontSize: 14,
-    fontFamily: 'Helvetica-Bold',
-    textDecoration: 'underline',
-    textTransform: 'uppercase',
-  },
-  // Client details block
-  clientSection: {
-    marginBottom: 12,
-  },
-  clientRow: {
+  // Budget Title & Status
+  titleSection: {
     flexDirection: 'row',
-    marginBottom: 3,
-  },
-  clientLabel: {
-    fontSize: 8.5,
-    fontFamily: 'Helvetica-Bold',
-    width: 65,
-  },
-  clientValue: {
-    fontSize: 8.5,
-    flex: 1,
-  },
-  // Row blocks with columns
-  clientGridRow: {
-    flexDirection: 'row',
-    marginBottom: 3,
-  },
-  // Helper columns widths to align with reference layout
-  colCEP: { width: '25%', flexDirection: 'row' },
-  colCidade: { width: '45%', flexDirection: 'row' },
-  colBairro: { width: '30%', flexDirection: 'row' },
-  colEmail: { width: '50%', flexDirection: 'row' },
-  colTelefone: { width: '30%', flexDirection: 'row' },
-  colEstado: { width: '20%', flexDirection: 'row' },
-  colCPF: { width: '45%', flexDirection: 'row' },
-  colRG: { width: '30%', flexDirection: 'row' },
-  colCelular: { width: '25%', flexDirection: 'row' },
-  
-  gridLabel: {
-    fontSize: 8.5,
-    fontFamily: 'Helvetica-Bold',
-  },
-  gridValue: {
-    fontSize: 8.5,
-  },
-  // Divider before items
-  itensDivider: {
-    borderTopWidth: 1,
-    borderTopColor: '#000000',
-    borderBottomWidth: 1,
-    borderBottomColor: '#000000',
-    paddingVertical: 2,
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginVertical: 12,
+    marginBottom: 15,
   },
-  itensDividerText: {
+  titleText: {
+    fontSize: 16,
+    fontFamily: 'Helvetica-Bold',
+    color: '#18181b',
+  },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
     fontSize: 8,
     fontFamily: 'Helvetica-Bold',
-    letterSpacing: 2,
+    textAlign: 'center',
   },
-  // Table Section
-  table: {
-    borderWidth: 1,
-    borderColor: '#000000',
-    width: '100%',
-  },
-  tableRowHeader: {
+  // Info Grid Box (Customer & Dates info)
+  infoGrid: {
     flexDirection: 'row',
+    gap: 12,
+    marginBottom: 12,
+  },
+  infoCard: {
+    flex: 1,
+    backgroundColor: '#fafafa', // zinc-50 equivalent
+    borderWidth: 1,
+    borderColor: '#f4f4f5', // zinc-100 equivalent
+    borderRadius: 6,
+    padding: 10,
+  },
+  cardTitle: {
+    fontSize: 8.5,
+    fontFamily: 'Helvetica-Bold',
+    color: '#2563eb', // primary blue
+    marginBottom: 6,
+    textTransform: 'uppercase',
+  },
+  cardRow: {
+    flexDirection: 'row',
+    marginBottom: 4,
+  },
+  cardLabel: {
+    fontSize: 8,
+    fontFamily: 'Helvetica-Bold',
+    color: '#71717a', // zinc-500
+    width: 60,
+  },
+  cardValue: {
+    fontSize: 8,
+    color: '#18181b',
+    flex: 1,
+  },
+  // Address row
+  addressSection: {
+    backgroundColor: '#fafafa',
+    borderWidth: 1,
+    borderColor: '#f4f4f5',
+    borderRadius: 6,
+    padding: 10,
+    marginBottom: 20,
+  },
+  // Items Table section
+  sectionTitle: {
+    fontSize: 8.5,
+    fontFamily: 'Helvetica-Bold',
+    color: '#71717a',
+    textTransform: 'uppercase',
+    marginBottom: 6,
+  },
+  table: {
+    width: '100%',
+    marginBottom: 15,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#e4e4e7',
+    overflow: 'hidden',
+  },
+  tableHeader: {
+    flexDirection: 'row',
+    backgroundColor: '#f4f4f5',
     borderBottomWidth: 1,
-    borderBottomColor: '#000000',
-    backgroundColor: '#ffffff',
+    borderBottomColor: '#e4e4e7',
     alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
   },
   tableRow: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderBottomColor: '#000000',
+    borderBottomColor: '#f4f4f5',
     alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
   },
-  colDesc: {
-    width: '70%',
-    padding: 5,
-    fontSize: 8.5,
-  },
-  colValUnit: {
-    width: '15%',
-    padding: 5,
-    textAlign: 'right',
-    fontSize: 8.5,
-    borderLeftWidth: 1,
-    borderLeftColor: '#000000',
-  },
-  colValTotal: {
-    width: '15%',
-    padding: 5,
-    textAlign: 'right',
-    fontSize: 8.5,
-    borderLeftWidth: 1,
-    borderLeftColor: '#000000',
-  },
-  headerText: {
+  thText: {
+    fontSize: 8,
     fontFamily: 'Helvetica-Bold',
+    color: '#71717a',
   },
-  rowItemText: {
-    fontFamily: 'Helvetica',
+  tdText: {
+    fontSize: 8,
+    color: '#18181b',
   },
-  // Totals Box aligned with the end cols (15% + 15% = 30%)
+  // Table Columns matching VisualizarOrcamentoDialog
+  colItem: { width: '45%' },
+  colTipo: { width: '15%', textAlign: 'center' },
+  colQtd: { width: '10%', textAlign: 'right' },
+  colUnit: { width: '15%', textAlign: 'right' },
+  colTotal: { width: '15%', textAlign: 'right' },
+
+  // Tipo Badges
+  typeBadgeProd: {
+    backgroundColor: '#eff6ff',
+    color: '#1d4ed8',
+    fontSize: 7,
+    fontFamily: 'Helvetica-Bold',
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    borderRadius: 3,
+    textAlign: 'center',
+    alignSelf: 'center',
+  },
+  typeBadgeServ: {
+    backgroundColor: '#eef2ff',
+    color: '#4338ca',
+    fontSize: 7,
+    fontFamily: 'Helvetica-Bold',
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    borderRadius: 3,
+    textAlign: 'center',
+    alignSelf: 'center',
+  },
+
+  // Totals Section
+  totalsSection: {
+    alignItems: 'flex-end',
+    marginBottom: 20,
+  },
   totalsContainer: {
+    width: 200,
+    gap: 4,
+  },
+  totalsRow: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-    width: '100%',
-  },
-  totalsBlock: {
-    width: '30%',
-    borderLeftWidth: 1,
-    borderRightWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: '#000000',
-  },
-  totalRow: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: '#000000',
-    alignItems: 'center',
-  },
-  totalRowFinal: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  totalLabel: {
-    padding: 4,
+    justifyContent: 'space-between',
     fontSize: 8.5,
-    fontFamily: 'Helvetica-Bold',
-    width: '50%',
-    borderRightWidth: 1,
-    borderRightColor: '#000000',
+    color: '#71717a',
   },
-  totalValue: {
-    padding: 4,
-    fontSize: 8.5,
+  totalGeralRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    fontSize: 10,
     fontFamily: 'Helvetica-Bold',
-    textAlign: 'right',
-    width: '50%',
+    color: '#18181b',
+    borderTopWidth: 1,
+    borderTopColor: '#e4e4e7',
+    paddingTop: 6,
+    marginTop: 4,
   },
-  // Notes / Observations block
-  observacoesBox: {
+  totalGeralValue: {
+    color: '#2563eb', // blue-600
+  },
+
+  // Notes Box
+  notesBox: {
+    backgroundColor: '#fafafa',
     borderWidth: 1,
-    borderColor: '#000000',
-    padding: 5,
-    marginTop: 15,
+    borderColor: '#f4f4f5',
+    borderRadius: 6,
+    padding: 10,
+    marginTop: 10,
   },
-  observacoesHeader: {
-    fontSize: 8.5,
+  notesHeader: {
+    fontSize: 8,
     fontFamily: 'Helvetica-Bold',
+    color: '#71717a',
+    textTransform: 'uppercase',
     marginBottom: 4,
   },
-  observacoesText: {
-    fontSize: 8.5,
-    lineHeight: 1.3,
+  notesText: {
+    fontSize: 8,
+    color: '#52525b',
+    lineHeight: 1.4,
   },
 });
-
-interface EnderecoDecomposto {
-  logradouro: string;
-  numero: string;
-  cep: string;
-  bairro: string;
-  cidade: string;
-  estado: string;
-}
-
-// Decomposition parser function to structure address details gracefully as in the image template
-function decomporEndereco(enderecoStr?: string): EnderecoDecomposto {
-  const result: EnderecoDecomposto = {
-    logradouro: '—',
-    numero: '—',
-    cep: '—',
-    bairro: '—',
-    cidade: '—',
-    estado: '—'
-  };
-
-  if (!enderecoStr) return result;
-
-  // Split components by comma
-  const parts = enderecoStr.split(',').map(p => p.trim());
-
-  // Detect CEP (5 digits, optional dash, 3 digits) and State (2 upper letters) using regex
-  const cepRegex = /\b\d{5}-?\d{3}\b/;
-  const stateRegex = /\b([A-Z]{2})\b/;
-
-  const cepMatch = enderecoStr.match(cepRegex);
-  if (cepMatch) {
-    result.cep = cepMatch[0];
-  }
-
-  const stateMatch = enderecoStr.match(stateRegex);
-  if (stateMatch) {
-    result.estado = stateMatch[1];
-  }
-
-  if (parts.length >= 5) {
-    result.logradouro = parts[0] || '—';
-    result.numero = parts[1] || '—';
-    
-    if (result.cep === '—' && cepRegex.test(parts[2])) {
-      result.cep = parts[2];
-    }
-    
-    result.cidade = parts[3] || '—';
-    if (result.cidade.length > 2 && result.cidade.includes(' - ')) {
-      result.cidade = result.cidade.split(' - ')[0];
-    }
-
-    if (result.estado === '—') {
-      result.estado = parts[4] || '—';
-    }
-    
-    if (parts.length >= 6) {
-      result.bairro = parts[5];
-    } else if (!cepRegex.test(parts[2]) && parts[2] !== result.cep) {
-      result.bairro = parts[2];
-    }
-  } else if (parts.length === 4) {
-    result.logradouro = parts[0];
-    result.numero = parts[1];
-    result.cidade = parts[2];
-    if (result.estado === '—') {
-      result.estado = parts[3];
-    }
-  } else if (parts.length === 3) {
-    result.logradouro = parts[0];
-    if (parts[1] && /^\d+$/.test(parts[1])) {
-      result.numero = parts[1];
-      result.cidade = parts[2];
-    } else {
-      result.cidade = parts[1];
-      if (result.estado === '—') {
-        result.estado = parts[2];
-      }
-    }
-  } else {
-    result.logradouro = enderecoStr;
-  }
-
-  // Clean prefix keywords
-  if (result.logradouro) result.logradouro = result.logradouro.replace(/( CEP| CEP:).*$/gi, '').trim();
-  if (result.cidade) result.cidade = result.cidade.replace(/^(Cidade:?|City:?)\s*/i, '').trim();
-  if (result.estado) result.estado = result.estado.replace(/^(Estado:?|UF:?)\s*/i, '').trim();
-  if (result.cep) result.cep = result.cep.replace(/^(CEP:?)\s*/i, '').trim();
-  if (result.bairro) result.bairro = result.bairro.replace(/^(Bairro:?)\s*/i, '').trim();
-
-  return result;
-}
 
 interface OrcamentoPDFProps {
   orcamento: Orcamento;
@@ -339,214 +261,291 @@ interface OrcamentoPDFProps {
 }
 
 export function OrcamentoPDF({ orcamento, empresa }: OrcamentoPDFProps) {
-  const dataCriacao = orcamento.criadoEm 
-    ? (orcamento.criadoEm instanceof Date 
-        ? orcamento.criadoEm 
-        : (orcamento.criadoEm as any).toDate?.() || new Date(orcamento.criadoEm as any))
-    : new Date();
+  // Format dates securely
+  const getFormattedDate = (criadoEm: any) => {
+    if (!criadoEm) return '-';
+    try {
+      if (criadoEm.seconds) {
+        return new Date(criadoEm.seconds * 1000).toLocaleDateString('pt-BR');
+      }
+      if (typeof criadoEm.toDate === 'function') {
+        return criadoEm.toDate().toLocaleDateString('pt-BR');
+      }
+      return new Date(criadoEm).toLocaleDateString('pt-BR');
+    } catch (e) {
+      return '-';
+    }
+  };
 
-  const formattedDate = dataCriacao.toLocaleDateString('pt-BR');
-  
+  const formattedDate = getFormattedDate(orcamento.criadoEm);
+
   // Format currency helpers for Portuguese
   const formatCurrency = (val: number) => {
     return 'R$ ' + Number(val).toFixed(2).replace('.', ',');
   };
 
-  // Parse client address details
-  const decomposto = decomporEndereco(orcamento.cliente.endereco);
-
   // Calculate clean numeric value for discount
   const getValorDesconto = () => {
-    if (orcamento.desconto <= 0) return 0;
+    if (!orcamento.desconto || orcamento.desconto <= 0) return 0;
     if (orcamento.descontoTipo === 'percentual') {
       return (orcamento.subtotal * orcamento.desconto) / 100;
     }
     return orcamento.desconto;
   };
 
+  // Get status label
+  const getStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      rascunho: 'Rascunho',
+      enviado: 'Enviado',
+      aprovado: 'Aprovado',
+      recusado: 'Recusado',
+      rejeitado: 'Rejeitado',
+      cancelado: 'Cancelado',
+      expirado: 'Expirado',
+    };
+    return labels[status] || status;
+  };
+
+  // Get status colors
+  const getStatusStyle = (status: string) => {
+    const bgColors: Record<string, string> = {
+      rascunho: '#f4f4f5',
+      enviado: '#eff6ff',
+      aprovado: '#ecfdf5',
+      recusado: '#fff1f2',
+      rejeitado: '#fff1f2',
+      cancelado: '#fef3c7',
+      expirado: '#fff7ed',
+    };
+    const textColors: Record<string, string> = {
+      rascunho: '#27272a',
+      enviado: '#1d4ed8',
+      aprovado: '#047857',
+      recusado: '#be123c',
+      rejeitado: '#be123c',
+      cancelado: '#b45309',
+      expirado: '#c2410c',
+    };
+    return {
+      backgroundColor: bgColors[status] || '#f4f4f5',
+      color: textColors[status] || '#27272a',
+    };
+  };
+
+  const statusStyle = getStatusStyle(orcamento.status);
+
+  // Secure local/proxied logo resolution
+  const getProxyUrl = (url: string) => {
+    if (url.startsWith('data:')) return url;
+    if (typeof window !== 'undefined') {
+      return `${window.location.origin}/api/proxy-image?url=${encodeURIComponent(url)}`;
+    }
+    return `/api/proxy-image?url=${encodeURIComponent(url)}`;
+  };
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        {/* Top Right Page Metadata */}
-        <View style={styles.topMetaContainer}>
-          <Text style={styles.topPageNum} render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages || 1}`} />
-          <Text style={styles.topDocNumber}>Número: {orcamento.numero || '—'}</Text>
-        </View>
-
         {/* Master Header */}
-        <View style={styles.headerContainer}>
+        <View style={styles.headerSection}>
           {/* Logo Block */}
           <View style={styles.logoContainer}>
             {empresa?.logoUrl ? (
-              <Image src={empresa.logoUrl} style={styles.logoImage} />
+              <Image 
+                src={getProxyUrl(empresa.logoUrl)} 
+                style={styles.logoImage} 
+              />
             ) : (
               <>
                 <Svg width={30} height={24} viewBox="0 0 100 80">
                   <Path 
                     d="M 50 10 C 25 10 25 40 25 45 C 25 55 50 75 50 75 C 50 75 75 55 75 45 C 75 40 75 10 50 10 Z" 
                     fill="none" 
-                    stroke="#000000" 
+                    stroke="#2563eb" 
                     strokeWidth="5" 
                   />
                   <Path 
                     d="M 35 45 Q 50 35 65 45 C 65 45 65 52 65 52 L 35 52 Z" 
-                    fill="#000000" 
+                    fill="#2563eb" 
                   />
-                  <Rect x={47} y={26} width={6} height={12} fill="#000000" />
+                  <Rect x={47} y={26} width={6} height={12} fill="#2563eb" />
                 </Svg>
-                <Text style={styles.logoBrandText}>{empresa?.empresa ? empresa.empresa.split(' ')[0].toUpperCase() : 'DALSIN'}</Text>
-                <Text style={styles.logoSubtext}>Materiais de construção</Text>
+                <Text style={styles.logoFallbackText}>
+                  {empresa?.empresa ? empresa.empresa.split(' ')[0] : 'EMPRESA'}
+                </Text>
+                <Text style={styles.logoSubtext}>Propostas Comerciais</Text>
               </>
             )}
           </View>
 
-          {/* Centered Business Information */}
-          <View style={styles.companyDetailsCentered}>
-            <Text style={styles.companyName}>{empresa?.empresa || 'Dalsin Materiais de Construção'}</Text>
-            <Text style={styles.companySub}>{empresa?.endereco || 'R. Alberto Muller, 68 - Santa Terezinha'}</Text>
-            <Text style={styles.companySub}>
-              Fone : {empresa?.telefone || '(48) 3259-9607'}      /
-            </Text>
-            <Text style={styles.companySub}>
-              Whatsapp : {empresa?.telefone || '(48) 9665-2001'}      /      {empresa?.email || 'dalsin_materials@gmail.com'}
-            </Text>
-            <Text style={styles.companySub}>CNPJ: {empresa?.cnpjCpf || '00.423.523/0001-40'}</Text>
+          {/* Business Information */}
+          <View style={styles.companyDetails}>
+            <Text style={styles.companyName}>{empresa?.empresa || 'Sua Empresa'}</Text>
+            {empresa?.endereco && <Text style={styles.companySub}>{empresa.endereco}</Text>}
+            {empresa?.telefone && <Text style={styles.companySub}>Fone / WhatsApp: {empresa.telefone}</Text>}
+            {empresa?.email && <Text style={styles.companySub}>E-mail: {empresa.email}</Text>}
+            {empresa?.cnpjCpf && <Text style={styles.companySub}>CNPJ: {empresa.cnpjCpf}</Text>}
           </View>
         </View>
 
-        {/* Big Underlined Centered Title */}
-        <View style={styles.documentTitleContainer}>
-          <Text style={styles.documentTitleText}>Orçamento</Text>
-        </View>
-
-        {/* Client details Grid layout mimicking the reference exactly */}
-        <View style={styles.clientSection}>
-          <View style={styles.clientRow}>
-            <Text style={styles.clientLabel}>Cliente : </Text>
-            <Text style={styles.clientValue}>{orcamento.cliente.nome}</Text>
-          </View>
-          
-          <View style={styles.clientRow}>
-            <Text style={styles.clientLabel}>Endereço : </Text>
-            <Text style={styles.clientValue}>
-              {decomposto.logradouro} {decomposto.numero !== '—' ? decomposto.numero : ''}
-            </Text>
-          </View>
-
-          <View style={styles.clientGridRow}>
-            <View style={styles.colCEP}>
-              <Text style={styles.gridLabel}>CEP : </Text>
-              <Text style={styles.gridValue}>{decomposto.cep}</Text>
-            </View>
-            <View style={styles.colCidade}>
-              <Text style={styles.gridLabel}>Cidade : </Text>
-              <Text style={styles.gridValue}>{decomposto.cidade}</Text>
-            </View>
-            <View style={styles.colBairro}>
-              <Text style={styles.gridLabel}>Bairro : </Text>
-              <Text style={styles.gridValue}>{decomposto.bairro}</Text>
-            </View>
-          </View>
-
-          <View style={styles.clientGridRow}>
-            <View style={styles.colEmail}>
-              <Text style={styles.gridLabel}>E-mail : </Text>
-              <Text style={styles.gridValue}>{orcamento.cliente.email || '—'}</Text>
-            </View>
-            <View style={styles.colTelefone}>
-              <Text style={styles.gridLabel}>Telefone : </Text>
-              <Text style={styles.gridValue}>{orcamento.cliente.telefone || '—'}</Text>
-            </View>
-            <View style={styles.colEstado}>
-              <Text style={styles.gridLabel}>Estado : </Text>
-              <Text style={styles.gridValue}>{decomposto.estado}</Text>
-            </View>
-          </View>
-
-          <View style={styles.clientGridRow}>
-            <View style={styles.colCPF}>
-              <Text style={styles.gridLabel}>CPF / CNPJ : </Text>
-              <Text style={styles.gridValue}>{orcamento.cliente.cpfCnpj || '—'}</Text>
-            </View>
-            <View style={styles.colRG}>
-              <Text style={styles.gridLabel}>RG / Insc. Estadual : </Text>
-              <Text style={styles.gridValue}>Isento</Text>
-            </View>
-            <View style={styles.colCelular}>
-              <Text style={styles.gridLabel}>Celular : </Text>
-              <Text style={styles.gridValue}>{orcamento.cliente.telefone || '—'}</Text>
-            </View>
+        {/* Title and Status section */}
+        <View style={styles.titleSection}>
+          <Text style={styles.titleText}>Orçamento {orcamento.numero ? `#${orcamento.numero}` : ''}</Text>
+          <View style={[styles.statusBadge, statusStyle]}>
+            <Text>{getStatusLabel(orcamento.status)}</Text>
           </View>
         </View>
 
-        {/* Divider item group */}
-        <View style={styles.itensDivider}>
-          <Text style={styles.itensDividerText}>ITENS</Text>
+        {/* Customer and Validity Grid */}
+        <View style={styles.infoGrid}>
+          {/* Dados do Cliente */}
+          <View style={styles.infoCard}>
+            <Text style={styles.cardTitle}>Dados do Cliente</Text>
+            <View style={styles.cardRow}>
+              <Text style={styles.cardLabel}>Nome:</Text>
+              <Text style={styles.cardValue}>{orcamento.cliente.nome}</Text>
+            </View>
+            {orcamento.cliente.cpfCnpj && (
+              <View style={styles.cardRow}>
+                <Text style={styles.cardLabel}>CPF/CNPJ:</Text>
+                <Text style={styles.cardValue}>{orcamento.cliente.cpfCnpj}</Text>
+              </View>
+            )}
+            {orcamento.cliente.email && (
+              <View style={styles.cardRow}>
+                <Text style={styles.cardLabel}>E-mail:</Text>
+                <Text style={styles.cardValue}>{orcamento.cliente.email}</Text>
+              </View>
+            )}
+            {orcamento.cliente.telefone && (
+              <View style={styles.cardRow}>
+                <Text style={styles.cardLabel}>Telefone:</Text>
+                <Text style={styles.cardValue}>{orcamento.cliente.telefone}</Text>
+              </View>
+            )}
+          </View>
+
+          {/* Prazos e Validade */}
+          <View style={styles.infoCard}>
+            <Text style={styles.cardTitle}>Prazos e Validade</Text>
+            <View style={styles.cardRow}>
+              <Text style={styles.cardLabel}>Emissão:</Text>
+              <Text style={styles.cardValue}>{formattedDate}</Text>
+            </View>
+            <View style={styles.cardRow}>
+              <Text style={styles.cardLabel}>Validade:</Text>
+              <Text style={styles.cardValue}>{orcamento.validadeDias || 15} dias</Text>
+            </View>
+            {orcamento.condicoesPagamento && (
+              <View style={styles.cardRow}>
+                <Text style={styles.cardLabel}>Pagamento:</Text>
+                <Text style={styles.cardValue}>{orcamento.condicoesPagamento}</Text>
+              </View>
+            )}
+          </View>
         </View>
 
-        {/* Table list */}
+        {/* Address Row (if available) */}
+        {orcamento.cliente.endereco && (
+          <View style={styles.addressSection}>
+            <Text style={styles.cardTitle}>Endereço de Entrega / Cobrança</Text>
+            <Text style={styles.cardValue}>{orcamento.cliente.endereco}</Text>
+          </View>
+        )}
+
+        {/* Items Section */}
+        <Text style={styles.sectionTitle}>Itens do Orçamento</Text>
         <View style={styles.table}>
           {/* Header Row */}
-          <View style={styles.tableRowHeader}>
-            <Text style={[styles.colDesc, styles.headerText]}>Quantidade X Descrição</Text>
-            <Text style={[styles.colValUnit, styles.headerText]}>Valor Unitário</Text>
-            <Text style={[styles.colValTotal, styles.headerText]}>Valor Total</Text>
+          <View style={styles.tableHeader}>
+            <View style={styles.colItem}>
+              <Text style={styles.thText}>Item</Text>
+            </View>
+            <View style={styles.colTipo}>
+              <Text style={[styles.thText, { textAlign: 'center' }]}>Tipo</Text>
+            </View>
+            <View style={styles.colQtd}>
+              <Text style={[styles.thText, { textAlign: 'right' }]}>Qtd</Text>
+            </View>
+            <View style={styles.colUnit}>
+              <Text style={[styles.thText, { textAlign: 'right' }]}>Unitário</Text>
+            </View>
+            <View style={styles.colTotal}>
+              <Text style={[styles.thText, { textAlign: 'right' }]}>Total</Text>
+            </View>
           </View>
 
-          {/* Rows */}
-          {orcamento.itens && orcamento.itens.map((item, index) => (
-            <View key={index} style={styles.tableRow} wrap={false}>
-              <Text style={[styles.colDesc, styles.rowItemText]}>
-                {item.quantidade} X {item.descricao.toUpperCase()}
-              </Text>
-              <Text style={[styles.colValUnit, styles.rowItemText]}>
-                {formatCurrency(item.precoUnitario)}
-              </Text>
-              <Text style={[styles.colValTotal, styles.rowItemText]}>
-                {formatCurrency(item.subtotal)}
+          {/* Item Rows */}
+          {orcamento.itens && orcamento.itens.length > 0 ? (
+            orcamento.itens.map((item, index) => (
+              <View key={index} style={styles.tableRow} wrap={false}>
+                <View style={styles.colItem}>
+                  <Text style={styles.tdText}>{item.descricao}</Text>
+                </View>
+                <View style={styles.colTipo}>
+                  <Text style={item.tipo === 'produto' ? styles.typeBadgeProd : styles.typeBadgeServ}>
+                    {item.tipo === 'produto' ? 'PROD' : 'SERV'}
+                  </Text>
+                </View>
+                <View style={styles.colQtd}>
+                  <Text style={[styles.tdText, { textAlign: 'right' }]}>{item.quantidade}</Text>
+                </View>
+                <View style={styles.colUnit}>
+                  <Text style={[styles.tdText, { textAlign: 'right' }]}>{formatCurrency(item.precoUnitario)}</Text>
+                </View>
+                <View style={styles.colTotal}>
+                  <Text style={[styles.tdText, { textAlign: 'right', fontFamily: 'Helvetica-Bold' }]}>
+                    {formatCurrency(item.subtotal)}
+                  </Text>
+                </View>
+              </View>
+            ))
+          ) : (
+            <View style={styles.tableRow}>
+              <Text style={[styles.tdText, { flex: 1, textAlign: 'center', color: '#71717a' }]}>
+                Nenhum item adicionado.
               </Text>
             </View>
-          ))}
+          )}
         </View>
 
-        {/* Summary Block */}
-        <View style={styles.totalsContainer}>
-          <View style={styles.totalsBlock}>
-            {/* Subtotal */}
-            <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>Subtotal</Text>
-              <Text style={styles.totalValue}>{formatCurrency(orcamento.subtotal)}</Text>
+        {/* Totals Section */}
+        <View style={styles.totalsSection}>
+          <View style={styles.totalsContainer}>
+            <View style={styles.totalsRow}>
+              <Text>Subtotal:</Text>
+              <Text>{formatCurrency(orcamento.subtotal)}</Text>
             </View>
             
-            {/* Discount */}
-            <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>Desconto</Text>
-              <Text style={styles.totalValue}>{formatCurrency(getValorDesconto())}</Text>
-            </View>
-
-            {/* Optional Taxes Row */}
-            {orcamento.impostos > 0 && (
-              <View style={styles.totalRow}>
-                <Text style={styles.totalLabel}>Impostos</Text>
-                <Text style={styles.totalValue}>{formatCurrency(orcamento.impostos)}</Text>
+            {getValorDesconto() > 0 && (
+              <View style={[styles.totalsRow, { color: '#be123c' }]}>
+                <Text>Desconto:</Text>
+                <Text>- {formatCurrency(getValorDesconto())}</Text>
               </View>
             )}
 
-            {/* Total Final */}
-            <View style={styles.totalRowFinal}>
-              <Text style={styles.totalLabel}>Total Final</Text>
-              <Text style={styles.totalValue}>{formatCurrency(orcamento.total)}</Text>
+            {orcamento.impostos > 0 && (
+              <View style={[styles.totalsRow, { color: '#c2410c' }]}>
+                <Text>Impostos/Acréscimos:</Text>
+                <Text>+ {formatCurrency(orcamento.impostos)}</Text>
+              </View>
+            )}
+
+            <View style={styles.totalGeralRow}>
+              <Text>Total Geral:</Text>
+              <Text style={styles.totalGeralValue}>{formatCurrency(orcamento.total)}</Text>
             </View>
           </View>
         </View>
 
-        {/* Observations Empty box placeholder styled exactly like the reference template */}
-        <View style={styles.observacoesBox}>
-          <Text style={styles.observacoesHeader}>Observações:</Text>
-          <Text style={styles.observacoesText}>
-            {orcamento.observacoes || ''}
-          </Text>
-        </View>
+        {/* Observations block */}
+        {orcamento.observacoes && (
+          <View style={styles.notesBox}>
+            <Text style={styles.notesHeader}>Observações</Text>
+            <Text style={styles.notesText}>{orcamento.observacoes}</Text>
+          </View>
+        )}
       </Page>
     </Document>
   );

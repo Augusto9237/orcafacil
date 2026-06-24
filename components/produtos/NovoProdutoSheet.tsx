@@ -87,7 +87,7 @@ export function NovoProdutoSheet({ children }: { children: React.ReactNode }) {
       <SheetContent className="sm:max-w-md overflow-y-auto px-5 gap-0">
         <SheetHeader className="px-0">
           <SheetTitle>Novo Produto</SheetTitle>
-          <SheetDescription>
+          <SheetDescription className="text-xs">
             Insira os dados do produto. Clique em salvar quando terminar.
           </SheetDescription>
         </SheetHeader>

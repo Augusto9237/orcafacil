@@ -4,7 +4,7 @@ import { useProdutos } from '@/hooks/useProdutos';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
-import { Search, Eye, Pencil, Trash2, Info, Layers, DollarSign, Calendar, Tag, FileText, CheckCircle2, XCircle, Package } from 'lucide-react';
+import { Search, Eye, Pencil, Trash2, Info, Layers, DollarSign, Calendar, Tag, FileText, CheckCircle2, XCircle, Package, PackagePlus } from 'lucide-react';
 import { NovoProdutoSheet } from '@/components/produtos/NovoProdutoSheet';
 import { EditarProdutoSheet } from '@/components/produtos/EditarProdutoSheet';
 import Link from 'next/link';
@@ -94,7 +94,9 @@ export default function ProdutosPage() {
           <p className="text-muted-foreground text-xs">Gerencie seu catálogo de produtos.</p>
         </div>
         <NovoProdutoSheet>
-          <Button>Novo Produto</Button>
+          <Button>
+          <PackagePlus />
+          Novo Produto</Button>
         </NovoProdutoSheet>
       </div>
 

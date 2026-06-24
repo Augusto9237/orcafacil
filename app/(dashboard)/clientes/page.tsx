@@ -8,7 +8,7 @@ import { NovoClienteSheet } from '@/components/clientes/NovoClienteSheet';
 import { EditarClienteSheet } from '@/components/clientes/EditarClienteSheet';
 import { deleteDoc, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import { Search, Eye, Pencil, Trash2, Plus } from 'lucide-react';
+import { Search, Eye, Pencil, Trash2, Plus, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -113,7 +113,7 @@ export default function ClientesPage() {
         </div>
         <NovoClienteSheet>
           <Button>
-          <Plus/>
+          <UserPlus />
           Novo Cliente</Button>
         </NovoClienteSheet>
       </div>
