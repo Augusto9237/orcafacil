@@ -86,7 +86,7 @@ export default function ConfiguracoesPage() {
   }
 
   return (
-    <div className="space-y-6 py-12">
+    <div className="space-y-6 pt-12">
       <div>
         <h2 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Configurações</h2>
         <p className="text-muted-foreground text-xs md:text-sm">Personalize os dados e a identidade visual da sua empresa para orçamentos.</p>

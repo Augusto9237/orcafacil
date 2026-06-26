@@ -4,8 +4,8 @@ import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useClientes } from '@/hooks/useClientes';
-import { useProdutos } from '@/hooks/useProdutos';
 import { useServicos } from '@/hooks/useServicos';
+import { BuscarProdutoDialog } from '@/components/orcamentos/BuscarProdutoDialog';
 import { useOrcamentos } from '@/hooks/useOrcamentos';
 import { addDoc, collection, doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
@@ -55,7 +55,6 @@ function NovoOrcamentoPageContent() {
 
   const { usuario } = useAuth();
   const { clientes, carregando: loadingClientes } = useClientes();
-  const { produtos, carregando: loadingProdutos } = useProdutos();
   const { servicos, carregando: loadingServicos } = useServicos();
   const { orcamentos } = useOrcamentos();
 
@@ -78,10 +77,8 @@ function NovoOrcamentoPageContent() {
   const [isServiceDialogOpen, setIsServiceDialogOpen] = useState(false);
   const [isClientDialogOpen, setIsClientDialogOpen] = useState(false);
 
-  const [productSearch, setProductSearch] = useState('');
   const [serviceSearch, setServiceSearch] = useState('');
 
-  const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [selectedService, setSelectedService] = useState<any | null>(null);
 
   const [quantityToAdd, setQuantityToAdd] = useState<number>(1);
@@ -136,13 +133,6 @@ function NovoOrcamentoPageContent() {
   }, [clientes, clienteId]);
 
   // Dialog Search filters
-  const filteredProducts = useMemo(() => {
-    return produtos.filter(p => 
-      p.nome.toLowerCase().includes(productSearch.toLowerCase()) || 
-      (p.codigoInterno && p.codigoInterno.toLowerCase().includes(productSearch.toLowerCase()))
-    );
-  }, [produtos, productSearch]);
-
   const filteredServices = useMemo(() => {
     return servicos.filter(s => 
       s.nome.toLowerCase().includes(serviceSearch.toLowerCase()) || 
@@ -168,35 +158,6 @@ function NovoOrcamentoPageContent() {
   }, [subtotal, discountAmount, impostos]);
 
   // Add Item actions
-  const handleSelectProductForAdding = (prod: any) => {
-    setSelectedProduct(prod);
-    setPriceToAdd(prod.precoUnitario);
-    setQuantityToAdd(1);
-  };
-
-  const handleAddProductToItems = () => {
-    if (!selectedProduct) return;
-    
-    const newItem: ItemOrcamento = {
-      tipo: 'produto',
-      referenciaId: selectedProduct.id,
-      descricao: selectedProduct.nome,
-      unidade: selectedProduct.unidade || 'UN',
-      quantidade: quantityToAdd,
-      precoUnitario: priceToAdd,
-      subtotal: quantityToAdd * priceToAdd,
-      codigo: selectedProduct.codigoInterno || '',
-    };
-
-    setItens(prev => [...prev, newItem]);
-    setIsProductDialogOpen(false);
-    
-    // reset state
-    setSelectedProduct(null);
-    setProductSearch('');
-    toast.success('Produto adicionado ao orçamento');
-  };
-
   const handleSelectServiceForAdding = (serv: any) => {
     setSelectedService(serv);
     setPriceToAdd(serv.precoUnitario);
@@ -322,7 +283,7 @@ function NovoOrcamentoPageContent() {
   return (
     <div className="space-y-6 overflow-hidden max-h-screen min-h-0 py-12">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 ">
         <div className="flex items-center gap-3">
           <Button 
             variant="ghost" 
@@ -333,7 +294,7 @@ function NovoOrcamentoPageContent() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-zinc-550">
+            <h2 className="text-2xl md:text-2xl font-extrabold tracking-tight text-gray-900 dark:text-zinc-550">
               {editId ? `Editar Orçamento` : 'Novo Orçamento'}
             </h2>
             <p className="text-sm text-muted-foreground mt-0.5">
@@ -488,106 +449,25 @@ function NovoOrcamentoPageContent() {
 
               {/* Multi action triggers */}
               <div className="flex gap-2">
-                {/* Product search dialog trigger */}
-                <Dialog open={isProductDialogOpen} onOpenChange={setIsProductDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-9 gap-1 hover:bg-neutral-50">
-                      <Plus className="h-4 w-4" />
-                      Buscar Produtos
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-lg">
-                    <DialogHeader>
-                      <DialogTitle className="flex items-center gap-2">
-                        <Package className="h-5 w-5 text-zinc-700" />
-                        Buscar e Adicionar Produto
-                      </DialogTitle>
-                      <DialogDescription>
-                        Filtre seu catálogo e selecione o produto para incluir na proposta.
-                      </DialogDescription>
-                    </DialogHeader>
+                <Button 
+                  type="button"
+                  variant="outline" 
+                  size="sm" 
+                  className="h-9 gap-1 hover:bg-neutral-50"
+                  onClick={() => setIsProductDialogOpen(true)}
+                >
+                  <Plus className="h-4 w-4" />
+                  Buscar Produtos
+                </Button>
 
-                    {/* Integrated list and search component */}
-                    <div className="space-y-4 pt-4">
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input 
-                          placeholder="Buscar produto por nome ou código..." 
-                          value={productSearch}
-                          onChange={(e) => setProductSearch(e.target.value)}
-                          className="pl-9"
-                        />
-                      </div>
-
-                      {/* Items matching container */}
-                      <div className="border rounded-md max-h-48 overflow-y-auto divide-y bg-background">
-                        {loadingProdutos ? (
-                          <div className="p-4 text-center text-xs text-muted-foreground">Carregando catálogo...</div>
-                        ) : filteredProducts.length === 0 ? (
-                          <div className="p-4 text-center text-xs text-muted-foreground">Nenhum produto correspondente.</div>
-                        ) : (
-                          filteredProducts.map(p => (
-                            <button
-                              key={p.id}
-                              type="button"
-                              onClick={() => handleSelectProductForAdding(p)}
-                              className={`w-full text-left p-3 text-xs flex justify-between items-center transition-all hover:bg-neutral-50 ${
-                                selectedProduct?.id === p.id ? 'bg-primary/5 border-l-2 border-primary' : ''
-                              }`}
-                            >
-                              <div>
-                                <p className="font-semibold text-foreground">{p.nome}</p>
-                                <p className="text-muted-foreground mt-0.5">
-                                  {p.codigoInterno ? `Código: ${p.codigoInterno} • ` : ''}Unidade: {p.unidade}
-                                </p>
-                              </div>
-                              <div className="text-right font-medium">
-                                R$ {Number(p.precoUnitario).toFixed(2)}
-                              </div>
-                            </button>
-                          ))
-                        )}
-                      </div>
-
-                      {/* Add item modifiers setup */}
-                      {selectedProduct && (
-                        <div className="border border-primary/20 bg-primary/5 rounded-lg p-4 space-y-4 animate-scale-in">
-                          <p className="text-xs font-semibold uppercase text-primary/80">Configure as condições do item:</p>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1.5">
-                              <label className="text-xs font-medium text-muted-foreground">Quantidade</label>
-                              <Input 
-                                type="number" 
-                                min="1" 
-                                value={quantityToAdd} 
-                                onChange={(e) => setQuantityToAdd(Number(e.target.value))} 
-                              />
-                            </div>
-                            <div className="space-y-1.5">
-                              <label className="text-xs font-medium text-muted-foreground">Preço Unitário Aplicado (R$)</label>
-                              <Input 
-                                type="number" 
-                                step="0.01" 
-                                min="0" 
-                                value={priceToAdd} 
-                                onChange={(e) => setPriceToAdd(Number(e.target.value))} 
-                              />
-                            </div>
-                          </div>
-                          <div className="flex justify-between items-center bg-background p-2.5 rounded-md border text-xs">
-                            <span className="text-muted-foreground">Subtotal Calculado:</span>
-                            <span className="font-mono font-bold text-base text-foreground">
-                              R$ {(quantityToAdd * priceToAdd).toFixed(2)}
-                            </span>
-                          </div>
-                          <Button onClick={handleAddProductToItems} className="w-full">
-                            Confirmar & Adicionar
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                <BuscarProdutoDialog
+                  open={isProductDialogOpen}
+                  onOpenChange={setIsProductDialogOpen}
+                  onAddProduct={(item) => {
+                    setItens(prev => [...prev, item]);
+                    toast.success('Produto adicionado ao orçamento');
+                  }}
+                />
 
                 {/* Service search dialog trigger */}
                 <Dialog open={isServiceDialogOpen} onOpenChange={setIsServiceDialogOpen}>

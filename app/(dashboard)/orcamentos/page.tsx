@@ -125,7 +125,7 @@ export default function OrcamentosPage() {
     <div id="orcamentos-container" className="space-y-6 py-12">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Orçamentos</h2>
+          <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Orçamentos</h2>
           <p className="text-muted-foreground text-sm">Gerencie seus orçamentos e propostas comerciais.</p>
         </div>
         <Link href="/orcamentos/novo">

@@ -90,7 +90,7 @@ export default function ProdutosPage() {
     <div className="space-y-6 py-12">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Produtos</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Produtos</h2>
           <p className="text-muted-foreground text-xs">Gerencie seu catálogo de produtos.</p>
         </div>
         <NovoProdutoSheet>

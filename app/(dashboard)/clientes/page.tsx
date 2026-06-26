@@ -10,6 +10,7 @@ import { deleteDoc, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { Search, Eye, Pencil, Trash2, Plus, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -55,6 +56,7 @@ const renderEnderecoVal = (endereco?: Cliente['endereco'] | string) => {
 export default function ClientesPage() {
   const { clientes, carregando } = useClientes();
   const [busca, setBusca] = useState('');
+  const [filtroTipo, setFiltroTipo] = useState('todos');
   
   // States for Edit / Delete / View operations
   const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
@@ -67,10 +69,12 @@ export default function ClientesPage() {
     return <div className="space-y-4"><Skeleton className="h-[400px] w-full rounded-xl" /></div>;
   }
 
-  const clientesFiltrados = clientes.filter(cliente =>
-    cliente.nome.toLowerCase().includes(busca.toLowerCase()) ||
-    (cliente.cpfCnpj && cliente.cpfCnpj.toLowerCase().includes(busca.toLowerCase()))
-  );
+  const clientesFiltrados = clientes.filter(cliente => {
+    const matchesBusca = cliente.nome.toLowerCase().includes(busca.toLowerCase()) ||
+      (cliente.cpfCnpj && cliente.cpfCnpj.toLowerCase().includes(busca.toLowerCase()));
+    const matchesTipo = filtroTipo === 'todos' || cliente.tipo === filtroTipo;
+    return matchesBusca && matchesTipo;
+  });
 
   const iniciarVisualizacao = (cliente: Cliente) => {
     setSelectedCliente(cliente);
@@ -108,7 +112,7 @@ export default function ClientesPage() {
     <div className="space-y-6 flex-1 h-full py-12">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold tracking-tight">Clientes</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Clientes</h2>
           <p className="text-muted-foreground text-sm">Gerencie seus clientes.</p>
         </div>
         <NovoClienteSheet>
@@ -118,21 +122,35 @@ export default function ClientesPage() {
         </NovoClienteSheet>
       </div>
 
-      <div className="max-w-md relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Buscar clientes por nome ou CPF/CNPJ..."
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-          className="pl-9"
-        />
+      <div className="flex items-center w-full justify-between">
+        <div className="flex-1 max-w-md relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar clientes por nome ou CPF/CNPJ..."
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            className="pl-9 w-full"
+          />
+        </div>
+        <div className="w-full sm:w-48">
+          <Select value={filtroTipo} onValueChange={setFiltroTipo}>
+            <SelectTrigger className="w-full bg-white dark:bg-zinc-950">
+              <SelectValue placeholder="Filtrar por tipo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos os tipos</SelectItem>
+              <SelectItem value="pessoa_fisica">Pessoa Física</SelectItem>
+              <SelectItem value="pessoa_juridica">Pessoa Jurídica</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="rounded-md border bg-white shadow-sm dark:bg-zinc-950 overflow-hidden">
         {clientes.length === 0 ? (
           <p className="text-center text-muted-foreground py-12">Nenhum cliente cadastrado.</p>
         ) : clientesFiltrados.length === 0 ? (
-          <p className="text-center text-muted-foreground py-12">Nenhum cliente encontrado para "{busca}".</p>
+          <p className="text-center text-muted-foreground py-12">Nenhum cliente encontrado.</p>
         ) : (
           <Table>
             <TableHeader>
