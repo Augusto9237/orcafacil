@@ -119,6 +119,7 @@ export default function ProdutosPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[80px] font-semibold">Imagem</TableHead>
                 <TableHead className="w-[150px] font-semibold">Código</TableHead>
                 <TableHead className="font-semibold">Nome</TableHead>
                 <TableHead className="font-semibold">Preço Unitário</TableHead>
@@ -130,6 +131,24 @@ export default function ProdutosPage() {
             <TableBody>
               {produtosFiltrados.map((produto) => (
                 <TableRow key={produto.id} className="group hover:bg-zinc-50/50 dark:hover:bg-zinc-900/50">
+                  <TableCell className="w-[80px]">
+                    {produto.imageUrl ? (
+                      <div className="h-10 w-10 rounded-md border bg-zinc-100 dark:bg-zinc-900 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                        <img
+                          src={produto.imageUrl}
+                          alt={produto.nome}
+                          className="h-full w-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLElement).style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-10 w-10 rounded-md border bg-zinc-50 dark:bg-zinc-900 flex-shrink-0 flex items-center justify-center text-zinc-400">
+                        <Package className="h-5 w-5" />
+                      </div>
+                    )}
+                  </TableCell>
                   <TableCell className="font-mono text-zinc-500 text-xs">
                     {produto.codigoInterno || '-'}
                   </TableCell>
@@ -206,6 +225,15 @@ export default function ProdutosPage() {
 
           {detalhesProduto && (
             <div className="space-y-4 py-2">
+              {detalhesProduto.imageUrl && (
+                <div className="w-full h-44 rounded-lg border overflow-hidden bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center">
+                  <img
+                    src={detalhesProduto.imageUrl}
+                    alt={detalhesProduto.nome}
+                    className="max-h-full max-w-full object-contain"
+                  />
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block">Código / SKU</span>

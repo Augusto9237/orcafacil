@@ -34,6 +34,7 @@ const formSchema = z.object({
   unidade: z.string().min(1, 'Selecione ou insira uma unidade de medida'),
   precoUnitario: z.coerce.number().min(0.01, 'O preço deve ser maior que zero'),
   estoque: z.coerce.number().optional().default(0),
+  imageUrl: z.string().optional(),
   descricao: z.string().optional(),
   ativo: z.boolean().default(true),
 });
@@ -56,6 +57,7 @@ export function EditarProdutoSheet({ produto, open, onOpenChange }: EditarProdut
       unidade: 'UN',
       precoUnitario: 0,
       estoque: 0,
+      imageUrl: '',
       descricao: '',
       ativo: true,
     },
@@ -70,6 +72,7 @@ export function EditarProdutoSheet({ produto, open, onOpenChange }: EditarProdut
         unidade: produto.unidade || 'UN',
         precoUnitario: produto.precoUnitario || 0,
         estoque: produto.estoque ?? 0,
+        imageUrl: produto.imageUrl || '',
         descricao: produto.descricao || '',
         ativo: produto.ativo !== false,
       });
@@ -197,6 +200,34 @@ export function EditarProdutoSheet({ produto, open, onOpenChange }: EditarProdut
                 )}
               />
             </div>
+
+            <FormField
+              control={form.control}
+              name="imageUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>URL da Imagem</FormLabel>
+                  <FormControl>
+                    <div className="space-y-2">
+                      <Input placeholder="Ex: https://exemplo.com/imagem.jpg" {...field} />
+                      {field.value && (
+                        <div className="relative h-20 w-20 rounded border overflow-hidden bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center">
+                          <img
+                            src={field.value}
+                            alt="Visualização do produto"
+                            className="object-cover h-full w-full"
+                            onError={(e) => {
+                              (e.target as HTMLElement).style.display = 'none';
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}

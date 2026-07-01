@@ -52,6 +52,7 @@ export interface Produto {
   codigoInterno?: string;
   estoque?: number;
   ativo: boolean;
+  imageUrl?: string;
   criadoEm: Timestamp | Date;
   atualizadoEm: Timestamp | Date;
 }

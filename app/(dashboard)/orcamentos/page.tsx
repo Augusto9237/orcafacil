@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Eye, Pencil, Trash2, Search } from 'lucide-react';
 import { doc, deleteDoc, updateDoc } from 'firebase/firestore';
@@ -94,18 +95,20 @@ export default function OrcamentosPage() {
   };
 
   const getStatusBadge = (status: string) => {
-    const configs: Record<string, { label: string; classes: string }> = {
-      rascunho: { label: 'Rascunho', classes: 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300' },
-      enviado: { label: 'Enviado', classes: 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-200/50 dark:border-blue-900/30' },
-      aprovado: { label: 'Aprovado', classes: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-950/30' },
-      rejeitado: { label: 'Rejeitado', classes: 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border border-rose-200/50 dark:border-rose-950/30' },
-      cancelado: { label: 'Cancelado', classes: 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200/50 dark:border-amber-950/30' },
+    const configs: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" | "ghost" }> = {
+      rascunho: { label: 'Rascunho', variant: 'secondary' },
+      enviado: { label: 'Enviado', variant: 'outline' },
+      aprovado: { label: 'Aprovado', variant: 'default' },
+      rejeitado: { label: 'Rejeitado', variant: 'destructive' },
+      recusado: { label: 'Recusado', variant: 'destructive' },
+      cancelado: { label: 'Cancelado', variant: 'ghost' },
+      expirado: { label: 'Expirado', variant: 'outline' },
     };
-    const config = configs[status] || { label: status, classes: 'bg-zinc-100 text-zinc-800' };
+    const config = configs[status] || { label: status, variant: 'secondary' };
     return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${config.classes}`}>
+      <Badge variant={config.variant}>
         {config.label}
-      </span>
+      </Badge>
     );
   };
 

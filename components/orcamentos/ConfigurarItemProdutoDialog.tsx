@@ -56,7 +56,18 @@ export function ConfigurarItemProdutoDialog({
   
         </DialogHeader>
         <div className="space-y-4">
-        <label></label>
+          {product.imageUrl && (
+            <div className="w-full h-28 rounded-lg border overflow-hidden bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center">
+              <img
+                src={product.imageUrl}
+                alt={product.nome}
+                className="max-h-full max-w-full object-contain"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                }}
+              />
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-muted-foreground">Quantidade ({product.unidade || 'UN'})</label>

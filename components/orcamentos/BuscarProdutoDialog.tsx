@@ -78,7 +78,7 @@ export function BuscarProdutoDialog({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            Buscar e Adicionar Produto
+            Buscar Produto
           </DialogTitle>
           <DialogDescription className="text-xs">
             Filtre seu catálogo e selecione o produto para incluir na proposta.
@@ -109,17 +109,35 @@ export function BuscarProdutoDialog({
                   key={p.id}
                   type="button"
                   onClick={() => handleSelectProductForAdding(p)}
-                  className={`w-full text-left p-3 text-xs rounded-md flex justify-between items-center transition-all hover:bg-neutral-50 ${
+                  className={`w-full text-left p-3 text-xs rounded-md flex justify-between items-center gap-3 transition-all hover:bg-neutral-50 ${
                     selectedProduct?.id === p.id ? 'bg-primary/5 border-l-2 border-primary' : ''
                   }`}
                 >
-                  <div>
-                    <p className="font-semibold text-foreground">{p.nome}</p>
-                    <p className="text-muted-foreground mt-0.5">
-                      {p.codigoInterno ? `Código: ${p.codigoInterno} • ` : ''}Unidade: {p.unidade}
-                    </p>
+                  <div className="flex items-center gap-3 min-w-0">
+                    {p.imageUrl ? (
+                      <div className="h-8 w-8 rounded border bg-zinc-100 dark:bg-zinc-900 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                        <img
+                          src={p.imageUrl}
+                          alt={p.nome}
+                          className="h-full w-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLElement).style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-8 w-8 rounded border bg-zinc-50 dark:bg-zinc-900 flex-shrink-0 flex items-center justify-center text-zinc-400">
+                        <Package className="h-4 w-4" />
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="font-semibold text-foreground truncate">{p.nome}</p>
+                      <p className="text-muted-foreground mt-0.5 truncate">
+                        {p.codigoInterno ? `Código: ${p.codigoInterno} • ` : ''}Unidade: {p.unidade}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-right font-medium">
+                  <div className="text-right font-medium flex-shrink-0">
                     R$ {Number(p.precoUnitario).toFixed(2)}
                   </div>
                 </button>
