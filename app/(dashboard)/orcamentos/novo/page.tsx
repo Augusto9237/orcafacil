@@ -331,7 +331,7 @@ function NovoOrcamentoPageContent() {
                 <User className="h-4 w-4 text-primary" />
                 Cliente
               </h3>
-              <h4 className="font-mono text-xs md:text-sm font-bold bg-neutral-100 dark:bg-zinc-900 text-neutral-600 dark:text-zinc-400 px-3 py-1.5 rounded-lg border border-dashed">
+              <h4 className="text-muted-foreground">
                 {suggestedNumber}
               </h4>
             </div>

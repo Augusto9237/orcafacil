@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Settings2 } from 'lucide-react';
+import { Package } from 'lucide-react';
 
 interface ConfigurarItemProdutoDialogProps {
   open: boolean;
@@ -48,26 +48,38 @@ export function ConfigurarItemProdutoDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md flex flex-col gap-4">
+        <div className="w-full h-48 rounded-lg border overflow-hidden bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center relative">
+          {product.imageUrl ? (
+            <img
+              src={product.imageUrl}
+              alt={product.nome}
+              className="max-h-full max-w-full object-contain"
+              onError={(e) => {
+                (e.target as HTMLElement).style.display = 'none';
+                const parent = (e.target as HTMLElement).parentElement;
+                if (parent) {
+                  const fallback = parent.querySelector('.fallback-icon');
+                  if (fallback) {
+                    fallback.classList.remove('hidden');
+                    fallback.classList.add('flex');
+                  }
+                }
+              }}
+            />
+          ) : null}
+          <div className={`fallback-icon items-center justify-center text-zinc-400 ${product.imageUrl ? 'hidden' : 'flex'}`}>
+            <Package className="h-12 w-12" />
+          </div>
+        </div>
+
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {product.codigoInterno} - {product.nome}
+            {product.codigoInterno ? `${product.codigoInterno} - ` : ''}{product.nome}
           </DialogTitle>
-  
         </DialogHeader>
+
         <div className="space-y-4">
-          {product.imageUrl && (
-            <div className="w-full h-28 rounded-lg border overflow-hidden bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center">
-              <img
-                src={product.imageUrl}
-                alt={product.nome}
-                className="max-h-full max-w-full object-contain"
-                onError={(e) => {
-                  (e.target as HTMLElement).style.display = 'none';
-                }}
-              />
-            </div>
-          )}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-muted-foreground">Quantidade ({product.unidade || 'UN'})</label>
