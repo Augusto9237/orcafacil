@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useClientes } from '@/hooks/useClientes';
 import { useServicos } from '@/hooks/useServicos';
 import { BuscarProdutoDialog } from '@/components/orcamentos/BuscarProdutoDialog';
+import { BuscarServicoDialog } from '@/components/orcamentos/BuscarServicoDialog';
 import { useOrcamentos } from '@/hooks/useOrcamentos';
 import { addDoc, collection, doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
@@ -55,7 +56,6 @@ function NovoOrcamentoPageContent() {
 
   const { usuario } = useAuth();
   const { clientes, carregando: loadingClientes } = useClientes();
-  const { servicos, carregando: loadingServicos } = useServicos();
   const { orcamentos } = useOrcamentos();
 
   const [clienteId, setClienteId] = useState<string>('');
@@ -76,13 +76,6 @@ function NovoOrcamentoPageContent() {
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [isServiceDialogOpen, setIsServiceDialogOpen] = useState(false);
   const [isClientDialogOpen, setIsClientDialogOpen] = useState(false);
-
-  const [serviceSearch, setServiceSearch] = useState('');
-
-  const [selectedService, setSelectedService] = useState<any | null>(null);
-
-  const [quantityToAdd, setQuantityToAdd] = useState<number>(1);
-  const [priceToAdd, setPriceToAdd] = useState<number>(0);
 
   // Suggested proposal number
   const suggestedNumber = useMemo(() => {
@@ -132,14 +125,6 @@ function NovoOrcamentoPageContent() {
     return clientes.find(c => c.id === clienteId);
   }, [clientes, clienteId]);
 
-  // Dialog Search filters
-  const filteredServices = useMemo(() => {
-    return servicos.filter(s => 
-      s.nome.toLowerCase().includes(serviceSearch.toLowerCase()) || 
-      (s.codigoInterno && s.codigoInterno.toLowerCase().includes(serviceSearch.toLowerCase()))
-    );
-  }, [servicos, serviceSearch]);
-
   // Calculations
   const subtotal = useMemo(() => {
     return itens.reduce((sum, item) => sum + item.subtotal, 0);
@@ -158,35 +143,6 @@ function NovoOrcamentoPageContent() {
   }, [subtotal, discountAmount, impostos]);
 
   // Add Item actions
-  const handleSelectServiceForAdding = (serv: any) => {
-    setSelectedService(serv);
-    setPriceToAdd(serv.precoUnitario);
-    setQuantityToAdd(1);
-  };
-
-  const handleAddServiceToItems = () => {
-    if (!selectedService) return;
-
-    const newItem: ItemOrcamento = {
-      tipo: 'servico',
-      referenciaId: selectedService.id,
-      descricao: selectedService.nome,
-      unidade: selectedService.unidade || 'H',
-      quantidade: quantityToAdd,
-      precoUnitario: priceToAdd,
-      subtotal: quantityToAdd * priceToAdd,
-      codigo: selectedService.codigoInterno || '',
-    };
-
-    setItens(prev => [...prev, newItem]);
-    setIsServiceDialogOpen(false);
-
-    // reset state
-    setSelectedService(null);
-    setServiceSearch('');
-    toast.success('Serviço adicionado ao orçamento');
-  };
-
   const removeItem = (index: number) => {
     setItens(prev => prev.filter((_, i) => i !== index));
     toast.info('Item removido');
@@ -470,105 +426,24 @@ function NovoOrcamentoPageContent() {
                 />
 
                 {/* Service search dialog trigger */}
-                <Dialog open={isServiceDialogOpen} onOpenChange={setIsServiceDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-9 gap-1 hover:bg-neutral-50">
-                      <Plus className="h-4 w-4" />
-                      Buscar Serviços
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-lg">
-                    <DialogHeader>
-                      <DialogTitle className="flex items-center gap-2">
-                        <Wrench className="h-5 w-5 text-zinc-700" />
-                        Buscar e Adicionar Serviço
-                      </DialogTitle>
-                      <DialogDescription>
-                        Consulte seu portfólio de serviços cadastrados para adicionar.
-                      </DialogDescription>
-                    </DialogHeader>
+                <Button 
+                  type="button"
+                  variant="outline" 
+                  size="sm" 
+                  className="h-9 gap-1 hover:bg-neutral-50"
+                  onClick={() => setIsServiceDialogOpen(true)}
+                >
+                  <Plus className="h-4 w-4" />
+                  Buscar Serviços
+                </Button>
 
-                    {/* Integrated search and listing setup */}
-                    <div className="space-y-4 pt-4">
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input 
-                          placeholder="Buscar serviço por nome ou código..." 
-                          value={serviceSearch}
-                          onChange={(e) => setServiceSearch(e.target.value)}
-                          className="pl-9"
-                        />
-                      </div>
-
-                      {/* Items match scroll collection */}
-                      <div className="border rounded-md max-h-48 overflow-y-auto divide-y bg-background">
-                        {loadingServicos ? (
-                          <div className="p-4 text-center text-xs text-muted-foreground">Carregando catálogo...</div>
-                        ) : filteredServices.length === 0 ? (
-                          <div className="p-4 text-center text-xs text-muted-foreground">Nenhum serviço correspondente.</div>
-                        ) : (
-                          filteredServices.map(s => (
-                            <button
-                              key={s.id}
-                              type="button"
-                              onClick={() => handleSelectServiceForAdding(s)}
-                              className={`w-full text-left p-3 text-xs flex justify-between items-center transition-all hover:bg-neutral-50 ${
-                                selectedService?.id === s.id ? 'bg-primary/5 border-l-2 border-primary' : ''
-                              }`}
-                            >
-                              <div>
-                                <p className="font-semibold text-foreground">{s.nome}</p>
-                                <p className="text-muted-foreground mt-0.5">
-                                  {s.codigoInterno ? `ID: ${s.codigoInterno} • ` : ''}Cobrança: {s.unidade}
-                                </p>
-                              </div>
-                              <div className="text-right font-medium">
-                                R$ {Number(s.precoUnitario).toFixed(2)}
-                              </div>
-                            </button>
-                          ))
-                        )}
-                      </div>
-
-                      {/* Modify fields on selection */}
-                      {selectedService && (
-                        <div className="border border-primary/20 bg-primary/5 rounded-lg p-4 space-y-4 animate-scale-in">
-                          <p className="text-xs font-semibold uppercase text-primary/80">Configure o serviço:</p>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1.5">
-                              <label className="text-xs font-medium text-muted-foreground">Quantidade / Horas</label>
-                              <Input 
-                                type="number" 
-                                min="1" 
-                                value={quantityToAdd} 
-                                onChange={(e) => setQuantityToAdd(Number(e.target.value))} 
-                              />
-                            </div>
-                            <div className="space-y-1.5">
-                              <label className="text-xs font-medium text-muted-foreground">Valor Cobrado (R$)</label>
-                              <Input 
-                                type="number" 
-                                step="0.01" 
-                                min="0" 
-                                value={priceToAdd} 
-                                onChange={(e) => setPriceToAdd(Number(e.target.value))} 
-                              />
-                            </div>
-                          </div>
-                          <div className="flex justify-between items-center bg-background p-2.5 rounded-md border text-xs">
-                            <span className="text-muted-foreground">Subtotal Calculado:</span>
-                            <span className="font-mono font-bold text-base text-foreground">
-                              R$ {(quantityToAdd * priceToAdd).toFixed(2)}
-                            </span>
-                          </div>
-                          <Button onClick={handleAddServiceToItems} className="w-full">
-                            Confirmar & Adicionar
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                <BuscarServicoDialog
+                  open={isServiceDialogOpen}
+                  onOpenChange={setIsServiceDialogOpen}
+                  onAddService={(item) => {
+                    setItens(prev => [...prev, item]);
+                  }}
+                />
               </div>
             </div>
 
