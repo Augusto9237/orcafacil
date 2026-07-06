@@ -45,9 +45,11 @@ import {
   Package,
   Wrench,
   Loader2,
-User
+User,
+  Pencil
 } from 'lucide-react';
 import type { ItemOrcamento, Cliente } from '@/types';
+import { EditarItemDialog } from '@/components/orcamentos/EditarItemDialog';
 
 function NovoOrcamentoPageContent() {
   const router = useRouter();
@@ -76,6 +78,9 @@ function NovoOrcamentoPageContent() {
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [isServiceDialogOpen, setIsServiceDialogOpen] = useState(false);
   const [isClientDialogOpen, setIsClientDialogOpen] = useState(false);
+
+  // States for editing items
+  const [editingItemIndex, setEditingItemIndex] = useState<number | null>(null);
 
   // Suggested proposal number
   const suggestedNumber = useMemo(() => {
@@ -146,6 +151,23 @@ function NovoOrcamentoPageContent() {
   const removeItem = (index: number) => {
     setItens(prev => prev.filter((_, i) => i !== index));
     toast.info('Item removido');
+  };
+
+  const handleConfirmEditItem = (quantity: number, price: number) => {
+    if (editingItemIndex === null) return;
+    setItens(prev => prev.map((item, i) => {
+      if (i === editingItemIndex) {
+        return {
+          ...item,
+          quantidade: quantity,
+          precoUnitario: price,
+          subtotal: quantity * price,
+        };
+      }
+      return item;
+    }));
+    toast.success('Item atualizado com sucesso!');
+    setEditingItemIndex(null);
   };
 
   const handleCreateOrcamento = async () => {
@@ -500,15 +522,28 @@ function NovoOrcamentoPageContent() {
                           R$ {Number(item.subtotal).toFixed(2)}
                         </TableCell>
                         <TableCell className="text-center pr-4">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removeItem(index)}
-                            className="h-8 w-8 text-zinc-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
-                          >
-                            <Trash className="h-4 w-4" />
-                            <span className="sr-only">Excluir</span>
-                          </Button>
+                          <div className="flex items-center justify-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => setEditingItemIndex(index)}
+                              className="h-8 w-8 text-zinc-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/40"
+                              title="Editar Item"
+                            >
+                              <Pencil className="h-4 w-4" />
+                              <span className="sr-only">Editar</span>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeItem(index)}
+                              className="h-8 w-8 text-zinc-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
+                              title="Excluir Item"
+                            >
+                              <Trash className="h-4 w-4" />
+                              <span className="sr-only">Excluir</span>
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -672,6 +707,13 @@ function NovoOrcamentoPageContent() {
         </div>
 
       </div>
+
+      <EditarItemDialog
+        open={editingItemIndex !== null}
+        onOpenChange={(open) => !open && setEditingItemIndex(null)}
+        item={editingItemIndex !== null ? itens[editingItemIndex] : null}
+        onConfirm={handleConfirmEditItem}
+      />
     </div>
   );
 }
