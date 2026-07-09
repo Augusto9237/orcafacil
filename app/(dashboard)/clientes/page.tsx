@@ -11,6 +11,7 @@ import { db } from '@/lib/firebase/config';
 import { Search, Eye, Pencil, Trash2, Plus, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
@@ -173,19 +174,25 @@ export default function ClientesPage() {
                     {cliente.cpfCnpj || '—'}
                   </TableCell>
                   <TableCell className="text-zinc-500 dark:text-zinc-400">
-                    {cliente.email || '-'}
+                    {cliente.email ? (
+                      <a
+                        id={`client-email-link-${cliente.id}`}
+                        href={`mailto:${cliente.email}`}
+                        className="text-blue-600 dark:text-blue-400 hover:underline hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+                      >
+                        {cliente.email}
+                      </a>
+                    ) : (
+                      '—'
+                    )}
                   </TableCell>
                   <TableCell className="text-zinc-500 dark:text-zinc-400">
                     {cliente.telefone || '-'}
                   </TableCell>
                   <TableCell>
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ${
-                      cliente.tipo === 'pessoa_juridica'
-                        ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300'
-                        : 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'
-                    }`}>
+                    <Badge variant={cliente.tipo === 'pessoa_juridica' ? 'default' : 'secondary'}>
                       {cliente.tipo === 'pessoa_juridica' ? 'Pessoa Jurídica' : 'Pessoa Física'}
-                    </span>
+                    </Badge>
                   </TableCell>
                   <TableCell className="text-right pr-6">
                     <div className="flex items-center justify-end gap-2">
@@ -270,7 +277,17 @@ export default function ClientesPage() {
               <div className="grid grid-cols-3 items-start gap-4 border-b border-zinc-100 dark:border-zinc-800 pb-2">
                 <span className="font-semibold text-zinc-500">E-mail:</span>
                 <span className="col-span-2 text-zinc-900 dark:text-zinc-100">
-                  {selectedCliente.email || 'Não informado'}
+                  {selectedCliente.email ? (
+                    <a
+                      id={`detail-email-link-${selectedCliente.id}`}
+                      href={`mailto:${selectedCliente.email}`}
+                      className="text-blue-600 dark:text-blue-400 hover:underline hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+                    >
+                      {selectedCliente.email}
+                    </a>
+                  ) : (
+                    'Não informado'
+                  )}
                 </span>
               </div>
               <div className="grid grid-cols-3 items-start gap-4 border-b border-zinc-100 dark:border-zinc-800 pb-2">

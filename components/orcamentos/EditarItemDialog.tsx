@@ -50,6 +50,16 @@ export function EditarItemDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md flex flex-col gap-4">
+    
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            Editar {item.tipo === 'produto' ? 'Produto' : 'Serviço'}
+          </DialogTitle>
+          <DialogDescription className="text-xs">
+            Altere a quantidade e o preço para este item na proposta.
+          </DialogDescription>
+        </DialogHeader>
+
         <div className="w-full h-32 rounded-lg border overflow-hidden bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center relative">
           <div className="flex items-center justify-center text-zinc-400">
             {item.tipo === 'produto' ? (
@@ -60,14 +70,6 @@ export function EditarItemDialog({
           </div>
         </div>
 
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            Editar {item.tipo === 'produto' ? 'Produto' : 'Serviço'}
-          </DialogTitle>
-          <DialogDescription className="text-xs">
-            Altere a quantidade e o preço para este item na proposta.
-          </DialogDescription>
-        </DialogHeader>
 
         <div className="space-y-4">
           <div className="space-y-1 bg-zinc-50 dark:bg-zinc-900/45 p-3 rounded-lg border">
