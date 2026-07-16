@@ -174,7 +174,7 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Faturamento (Aprovados)</CardTitle>
@@ -195,16 +195,7 @@ export default function DashboardPage() {
             <p className="text-xs text-muted-foreground">Total de orçamentos criados</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">OS em Andamento</CardTitle>
-            <ClipboardList className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{osAbertas}</div>
-            <p className="text-xs text-muted-foreground">Ordens de serviço abertas</p>
-          </CardContent>
-        </Card>
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Clientes Ativos</CardTitle>
