@@ -1,6 +1,6 @@
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { initializeFirestore } from "firebase/firestore";
 import firebaseAppletConfig from "../../firebase-applet-config.json";
 
 const firebaseConfig = firebaseAppletConfig || {
@@ -15,4 +15,6 @@ const firebaseConfig = firebaseAppletConfig || {
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
 export const auth = getAuth(app);
-export const db = getFirestore(app, firebaseAppletConfig?.firestoreDatabaseId);
+export const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true,
+}, firebaseAppletConfig?.firestoreDatabaseId);

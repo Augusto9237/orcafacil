@@ -19,6 +19,13 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -40,6 +47,7 @@ import {
 export default function ServicosPage() {
   const { servicos, carregando } = useServicos();
   const [busca, setBusca] = useState('');
+  const [statusFiltro, setStatusFiltro] = useState<string>('todos');
 
   // State for View Details
   const [detalhesServico, setDetalhesServico] = useState<any>(null);
@@ -72,9 +80,15 @@ export default function ServicosPage() {
     return <div className="space-y-4"><Skeleton className="h-[400px] w-full rounded-xl" /></div>;
   }
 
-  const servicosFiltrados = servicos.filter(servico =>
-    servico.nome.toLowerCase().includes(busca.toLowerCase())
-  );
+  const servicosFiltrados = servicos.filter(servico => {
+    const atendeBusca = servico.nome.toLowerCase().includes(busca.toLowerCase());
+    const isAtivo = servico.ativo !== false;
+    const atendeStatus =
+      statusFiltro === 'todos' ||
+      (statusFiltro === 'ativos' && isAtivo) ||
+      (statusFiltro === 'inativos' && !isAtivo);
+    return atendeBusca && atendeStatus;
+  });
 
   return (
     <div className="space-y-6 py-12">
@@ -88,21 +102,41 @@ export default function ServicosPage() {
         </NovoServicoSheet>
       </div>
 
-      <div className="max-w-md relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Buscar serviços por nome..."
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-          className="pl-9"
-        />
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+        <div className="max-w-md w-full relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            id="buscar-servicos"
+            placeholder="Buscar serviços por nome..."
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        
+        <div className="w-full sm:w-48">
+          <Select value={statusFiltro} onValueChange={setStatusFiltro}>
+            <SelectTrigger id="status-filtro-select" className="w-full">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem id="filtro-todos" value="todos">Todos os Status</SelectItem>
+              <SelectItem id="filtro-ativos" value="ativos">Apenas Ativos</SelectItem>
+              <SelectItem id="filtro-inativos" value="inativos">Apenas Inativos</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="rounded-md border bg-white shadow-sm dark:bg-zinc-950 overflow-hidden">
         {servicos.length === 0 ? (
           <p className="text-center text-muted-foreground py-12">Nenhum serviço cadastrado.</p>
         ) : servicosFiltrados.length === 0 ? (
-          <p className="text-center text-muted-foreground py-12">Nenhum serviço encontrado para "{busca}".</p>
+          <p className="text-center text-muted-foreground py-12">
+            {busca 
+              ? `Nenhum serviço encontrado para "${busca}".` 
+              : 'Nenhum serviço encontrado com as opções de filtro selecionadas.'}
+          </p>
         ) : (
           <Table>
             <TableHeader>

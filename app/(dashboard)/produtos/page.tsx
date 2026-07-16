@@ -4,6 +4,13 @@ import { useProdutos } from '@/hooks/useProdutos';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Search, Eye, Pencil, Trash2, Info, Layers, DollarSign, Calendar, Tag, FileText, CheckCircle2, XCircle, Package, PackagePlus } from 'lucide-react';
 import { NovoProdutoSheet } from '@/components/produtos/NovoProdutoSheet';
 import { EditarProdutoSheet } from '@/components/produtos/EditarProdutoSheet';
@@ -41,6 +48,7 @@ import {
 export default function ProdutosPage() {
   const { produtos, carregando } = useProdutos();
   const [busca, setBusca] = useState('');
+  const [statusFiltro, setStatusFiltro] = useState<string>('todos');
 
   // State for View Details
   const [detalhesProduto, setDetalhesProduto] = useState<any>(null);
@@ -82,9 +90,15 @@ export default function ProdutosPage() {
     return <div className="space-y-4"><Skeleton className="h-[400px] w-full rounded-xl" /></div>;
   }
 
-  const produtosFiltrados = produtos.filter(produto =>
-    produto.nome.toLowerCase().includes(busca.toLowerCase())
-  );
+  const produtosFiltrados = produtos.filter(produto => {
+    const atendeBusca = produto.nome.toLowerCase().includes(busca.toLowerCase());
+    const isAtivo = produto.ativo !== false;
+    const atendeStatus =
+      statusFiltro === 'todos' ||
+      (statusFiltro === 'ativos' && isAtivo) ||
+      (statusFiltro === 'inativos' && !isAtivo);
+    return atendeBusca && atendeStatus;
+  });
 
   return (
     <div className="space-y-6 py-12">
@@ -100,21 +114,41 @@ export default function ProdutosPage() {
         </NovoProdutoSheet>
       </div>
 
-      <div className="max-w-md relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Buscar produtos por nome..."
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-          className="pl-9"
-        />
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+        <div className="max-w-md w-full relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            id="buscar-produtos"
+            placeholder="Buscar produtos por nome..."
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+
+        <div className="w-full sm:w-48">
+          <Select value={statusFiltro} onValueChange={setStatusFiltro}>
+            <SelectTrigger id="status-filtro-produtos" className="w-full">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem id="filtro-todos" value="todos">Todos os Status</SelectItem>
+              <SelectItem id="filtro-ativos" value="ativos">Apenas Ativos</SelectItem>
+              <SelectItem id="filtro-inativos" value="inativos">Apenas Inativos</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="rounded-md border bg-white shadow-sm dark:bg-zinc-950 overflow-hidden">
         {produtos.length === 0 ? (
           <p className="text-center text-muted-foreground py-12">Nenhum produto cadastrado.</p>
         ) : produtosFiltrados.length === 0 ? (
-          <p className="text-center text-muted-foreground py-12">Nenhum produto encontrado para "{busca}".</p>
+          <p className="text-center text-muted-foreground py-12">
+            {busca 
+              ? `Nenhum produto encontrado para "${busca}".` 
+              : 'Nenhum produto encontrado com as opções de filtro selecionadas.'}
+          </p>
         ) : (
           <Table>
             <TableHeader>
