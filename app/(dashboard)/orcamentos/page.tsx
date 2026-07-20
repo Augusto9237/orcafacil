@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { Eye, Pencil, Trash2, Search } from 'lucide-react';
+import { Eye, Pencil, Trash2, Search, Plus } from 'lucide-react';
 import { doc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { toast } from 'sonner';
@@ -132,7 +132,9 @@ export default function OrcamentosPage() {
           <p className="text-muted-foreground text-sm">Gerencie seus orçamentos e propostas comerciais.</p>
         </div>
         <Link href="/orcamentos/novo">
-          <Button className="font-semibold">Novo Orçamento</Button>
+          <Button className="font-semibold">
+          <Plus/>
+          Novo Orçamento</Button>
         </Link>
       </div>
 

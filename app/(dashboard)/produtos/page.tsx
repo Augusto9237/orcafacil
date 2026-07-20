@@ -11,9 +11,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Eye, Pencil, Trash2, Info, Layers, DollarSign, Calendar, Tag, FileText, CheckCircle2, XCircle, Package, PackagePlus } from 'lucide-react';
+import { Search, Eye, Pencil, Trash2, Info, Layers, DollarSign, Calendar, Tag, FileText, CheckCircle2, XCircle, Package, PackagePlus, Plus } from 'lucide-react';
 import { NovoProdutoSheet } from '@/components/produtos/NovoProdutoSheet';
 import { EditarProdutoSheet } from '@/components/produtos/EditarProdutoSheet';
+import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { doc, deleteDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
@@ -109,7 +110,7 @@ export default function ProdutosPage() {
         </div>
         <NovoProdutoSheet>
           <Button>
-          <PackagePlus />
+          <Plus/>
           Novo Produto</Button>
         </NovoProdutoSheet>
       </div>
@@ -196,13 +197,21 @@ export default function ProdutosPage() {
                     {produto.unidade}
                   </TableCell>
                   <TableCell>
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ${
-                      produto.ativo !== false
-                        ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'
-                        : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400'
-                    }`}>
-                      {produto.ativo !== false ? 'Ativo' : 'Inativo'}
-                    </span>
+                    {produto.ativo !== false ? (
+                      <Badge
+                        id={`produto-status-${produto.id}`}
+                        className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-none hover:bg-emerald-100 dark:hover:bg-emerald-900/40 cursor-default"
+                      >
+                        Ativo
+                      </Badge>
+                    ) : (
+                      <Badge
+                        id={`produto-status-${produto.id}`}
+                        className="bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400 border-none hover:bg-zinc-200 dark:hover:bg-zinc-700 cursor-default"
+                      >
+                        Inativo
+                      </Badge>
+                    )}
                   </TableCell>
                   <TableCell className="text-right pr-6" id={`produto-actions-${produto.id}`}>
                     <div className="flex items-center justify-end gap-1.5">
