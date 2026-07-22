@@ -9,7 +9,14 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { User, CalendarClock, MapPin, Send, Check, X, Ban, Mail, Loader2 } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { User, CalendarClock, MapPin, Mail, Loader2 } from 'lucide-react';
 import type { Orcamento } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import { DownloadOrcamentoButton } from '@/components/PDFDownloadButtons';
@@ -104,31 +111,11 @@ export function VisualizarOrcamentoDialog({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto" id="visualizar-orcamento-dialog-content">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold flex flex-col sm:flex-row sm:items-center justify-between gap-3" id="visualizar-orcamento-title">
+          <DialogTitle className="text-xl font-bold flex items-center justify-between gap-3" id="visualizar-orcamento-title">
             <div className="flex items-center gap-2">
               <span>Orçamento {orcamento?.numero}</span>
               {orcamento && getStatusBadge(orcamento.status)}
             </div>
-            {orcamento && (
-              <div className="flex items-center gap-2 shrink-0">
-                <Button
-                  id="btn-enviar-email-padrao"
-                  size="sm"
-                  variant="outline"
-                  className="h-8 text-xs flex items-center gap-1.5 border-zinc-200 dark:border-zinc-800"
-                  disabled={enviandoEmail}
-                  onClick={handleEnviarEmailPadrao}
-                >
-                  {enviandoEmail ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin text-zinc-500" />
-                  ) : (
-                    <Mail className="h-3.5 w-3.5 text-zinc-500" />
-                  )}
-                  <span>Enviar por E-mail</span>
-                </Button>
-                <DownloadOrcamentoButton orcamento={orcamento} empresa={perfil} />
-              </div>
-            )}
           </DialogTitle>
           <DialogDescription className="pt-1">
             Visualize os dados completos do orçamento e gerencie o status da proposta comercial.
@@ -264,54 +251,51 @@ export function VisualizarOrcamentoDialog({
             )}
 
             {/* Actions */}
-            <div className="space-y-2 border-t pt-4">
+            <div className="space-y-3 border-t pt-4" id="orcamento-actions-section">
               <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">
-                Gerenciar Status da Proposta
+                Ações do Orçamento
               </h4>
-              <div className="flex flex-wrap items-center gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={atualizandoStatus || enviandoEmail || orcamento.status === 'enviado'}
-                  onClick={handleEnviarEmailPadrao}
-                  className="h-8 text-xs flex items-center gap-1 hover:bg-blue-50 dark:hover:bg-blue-950/40 border-blue-200 dark:border-blue-900 text-blue-600 dark:text-blue-400"
-                >
-                  {enviandoEmail ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-                  Enviar Proposta
-                </Button>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground font-medium">Status:</span>
+                  <Select
+                    value={orcamento.status}
+                    disabled={atualizandoStatus}
+                    onValueChange={(newStatus) => onUpdateStatus(orcamento.id, newStatus)}
+                  >
+                    <SelectTrigger className="h-8 text-xs w-[150px]" id="select-status-orcamento">
+                      <SelectValue placeholder="Selecione o status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="rascunho">Rascunho</SelectItem>
+                      <SelectItem value="enviado">Enviado</SelectItem>
+                      <SelectItem value="aprovado">Aprovado</SelectItem>
+                      <SelectItem value="recusado">Recusado</SelectItem>
+                      <SelectItem value="expirado">Expirado</SelectItem>
+                      <SelectItem value="cancelado">Cancelado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={atualizandoStatus || orcamento.status === 'aprovado'}
-                  onClick={() => onUpdateStatus(orcamento.id, 'aprovado')}
-                  className="h-8 text-xs flex items-center gap-1 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900 text-emerald-600 dark:text-emerald-400 font-semibold"
-                >
-                  <Check className="h-3.5 w-3.5" />
-                  Aprovar
-                </Button>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Button
+                    id="btn-enviar-email-padrao"
+                    size="sm"
+                    variant="outline"
+                    className="h-8 text-xs flex items-center gap-1.5 border-zinc-200 dark:border-zinc-800"
+                    disabled={enviandoEmail}
+                    onClick={handleEnviarEmailPadrao}
+                  >
+                    {enviandoEmail ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-zinc-500" />
+                    ) : (
+                      <Mail className="h-3.5 w-3.5 text-zinc-500" />
+                    )}
+                    <span>Enviar por E-mail</span>
+                  </Button>
 
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={atualizandoStatus || orcamento.status === 'recusado'}
-                  onClick={() => onUpdateStatus(orcamento.id, 'recusado')}
-                  className="h-8 text-xs flex items-center gap-1 hover:bg-rose-50 dark:hover:bg-rose-950/40 border-rose-200 dark:border-rose-900 text-rose-600 dark:text-rose-400"
-                >
-                  <X className="h-3.5 w-3.5" />
-                  Recusar / Rejeitar
-                </Button>
-
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={atualizandoStatus || orcamento.status === 'expirado'}
-                  onClick={() => onUpdateStatus(orcamento.id, 'expirado')}
-                  className="h-8 text-xs flex items-center gap-1 hover:bg-amber-50 dark:hover:bg-amber-950/40 border-amber-200 dark:border-amber-900 text-amber-600 dark:text-amber-400"
-                >
-                  <Ban className="h-3.5 w-3.5" />
-                  Expirar Proposta
-                </Button>
+                  <DownloadOrcamentoButton orcamento={orcamento} empresa={perfil} />
+                </div>
               </div>
             </div>
           </div>
