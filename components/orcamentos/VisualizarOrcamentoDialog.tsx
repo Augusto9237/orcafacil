@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -8,10 +9,12 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { User, CalendarClock, MapPin, Send, Check, X, Ban } from 'lucide-react';
+import { User, CalendarClock, MapPin, Send, Check, X, Ban, Mail, Loader2 } from 'lucide-react';
 import type { Orcamento } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import { DownloadOrcamentoButton } from '@/components/PDFDownloadButtons';
+import { OrcamentoPDF } from '@/components/OrcamentoPDF';
+import { toast } from 'sonner';
 
 interface VisualizarOrcamentoDialogProps {
   orcamento: Orcamento | undefined;
@@ -29,6 +32,7 @@ export function VisualizarOrcamentoDialog({
   atualizandoStatus,
 }: VisualizarOrcamentoDialogProps) {
   const { perfil } = useAuth();
+  const [enviandoEmail, setEnviandoEmail] = useState(false);
 
   const formatDate = (criadoEm: any) => {
     if (!criadoEm) return '-';
@@ -36,6 +40,46 @@ export function VisualizarOrcamentoDialog({
       return new Date(criadoEm.seconds * 1000).toLocaleDateString('pt-BR');
     }
     return new Date(criadoEm).toLocaleDateString('pt-BR');
+  };
+
+  const handleEnviarEmailPadrao = async () => {
+    if (!orcamento) return;
+    setEnviandoEmail(true);
+    try {
+      // 1. Generate and download PDF
+      const { pdf } = await import('@react-pdf/renderer');
+      const blob = await pdf(<OrcamentoPDF orcamento={orcamento} empresa={perfil} />).toBlob();
+      
+      const fileName = `Orcamento-${orcamento.numero || orcamento.id}.pdf`;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      // 2. Open default mail client on user's device
+      const emailDestino = orcamento.cliente?.email || '';
+      const assunto = `Orçamento Nº ${orcamento.numero} - ${perfil?.nome || 'Proposta Comercial'}`;
+      const corpo = `Olá, ${orcamento.cliente?.nome || 'Cliente'}!\n\nSegue em anexo a proposta comercial referente ao orçamento nº ${orcamento.numero}.\n\nFicamos à disposição para qualquer dúvida.\n\nAtenciosamente,\n${perfil?.nome || 'Nossa Empresa'}\n${perfil?.telefone ? `Telefone: ${perfil.telefone}\n` : ''}`;
+
+      const mailtoUrl = `mailto:${encodeURIComponent(emailDestino)}?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(corpo)}`;
+      window.location.href = mailtoUrl;
+
+      // 3. Update status to 'enviado' if currently 'rascunho'
+      if (orcamento.status === 'rascunho') {
+        await onUpdateStatus(orcamento.id, 'enviado');
+      }
+
+      toast.success('Software de e-mail aberto! O PDF do orçamento foi baixado para anexar.');
+    } catch (error) {
+      console.error('Erro ao preparar envio por e-mail:', error);
+      toast.error('Ocorreu um erro ao preparar o e-mail ou gerar o PDF.');
+    } finally {
+      setEnviandoEmail(false);
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -67,6 +111,21 @@ export function VisualizarOrcamentoDialog({
             </div>
             {orcamento && (
               <div className="flex items-center gap-2 shrink-0">
+                <Button
+                  id="btn-enviar-email-padrao"
+                  size="sm"
+                  variant="outline"
+                  className="h-8 text-xs flex items-center gap-1.5 border-zinc-200 dark:border-zinc-800"
+                  disabled={enviandoEmail}
+                  onClick={handleEnviarEmailPadrao}
+                >
+                  {enviandoEmail ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin text-zinc-500" />
+                  ) : (
+                    <Mail className="h-3.5 w-3.5 text-zinc-500" />
+                  )}
+                  <span>Enviar por E-mail</span>
+                </Button>
                 <DownloadOrcamentoButton orcamento={orcamento} empresa={perfil} />
               </div>
             )}
@@ -213,11 +272,11 @@ export function VisualizarOrcamentoDialog({
                 <Button
                   size="sm"
                   variant="outline"
-                  disabled={atualizandoStatus || orcamento.status === 'enviado'}
-                  onClick={() => onUpdateStatus(orcamento.id, 'enviado')}
+                  disabled={atualizandoStatus || enviandoEmail || orcamento.status === 'enviado'}
+                  onClick={handleEnviarEmailPadrao}
                   className="h-8 text-xs flex items-center gap-1 hover:bg-blue-50 dark:hover:bg-blue-950/40 border-blue-200 dark:border-blue-900 text-blue-600 dark:text-blue-400"
                 >
-                  <Send className="h-3.5 w-3.5" />
+                  {enviandoEmail ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
                   Enviar Proposta
                 </Button>
 
@@ -263,3 +322,4 @@ export function VisualizarOrcamentoDialog({
     </Dialog>
   );
 }
+
