@@ -9,6 +9,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -101,9 +102,9 @@ export function VisualizarOrcamentoDialog({
     };
     const config = configs[status] || { label: status, classes: 'bg-zinc-100 text-zinc-800' };
     return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${config.classes}`}>
+      <Badge className={config.classes}>
         {config.label}
-      </span>
+      </Badge>
     );
   };
 

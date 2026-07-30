@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -9,13 +9,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { TEMAS_DISPONIVEIS } from '@/components/theme-color-style';
 import { Building2, FileText, Phone, MapPin, Eye, Palette, Upload, Check, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
-
-const SAMPLE_LOGOS = [
-  { name: 'Aurora', url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=120&q=80' },
-  { name: 'Spectrum', url: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=120&q=80' },
-  { name: 'Flux', url: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&w=120&q=80' },
-  { name: 'Symmetry', url: 'https://images.unsplash.com/photo-1618005198143-e52834643503?auto=format&fit=crop&w=120&q=80' },
-];
 
 export default function ConfiguracoesPage() {
   const { perfil, atualizarPerfil, carregando: carregandoAuth } = useAuth();
@@ -25,8 +18,13 @@ export default function ConfiguracoesPage() {
   const [telefone, setTelefone] = useState('');
   const [endereco, setEndereco] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
+  const [logoError, setLogoError] = useState(false);
   const [corTema, setCorTema] = useState('zinc');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    setLogoError(false);
+  }, [logoUrl]);
 
   useEffect(() => {
     if (perfil) {
@@ -57,6 +55,19 @@ export default function ConfiguracoesPage() {
       console.error(err);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (perfil) {
+      setEmpresa(perfil.empresa || '');
+      setCnpjCpf(perfil.cnpjCpf || '');
+      setTelefone(perfil.telefone || '');
+      setEndereco(perfil.endereco || '');
+      setLogoUrl(perfil.logoUrl || '');
+      const temaAtual = perfil.corTema || 'zinc';
+      setCorTema(temaAtual === 'padrao' ? 'zinc' : temaAtual);
+      toast.info('Alterações descartadas.');
     }
   };
 
@@ -158,6 +169,27 @@ export default function ConfiguracoesPage() {
                 </div>
               </div>
             </CardContent>
+            <CardFooter className="flex items-center justify-end gap-2 border-t pt-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm"
+                onClick={handleCancel}
+                disabled={isSubmitting}
+                id="btn-cancelar-card-empresa"
+              >
+                Cancelar
+              </Button>
+              <Button 
+                type="submit" 
+                size="sm"
+                disabled={isSubmitting} 
+                className="font-semibold shadow"
+                id="btn-salvar-card-empresa"
+              >
+                {isSubmitting ? 'Salvando...' : 'Salvar'}
+              </Button>
+            </CardFooter>
           </Card>
 
           {/* Card 2: Logotipo */}
@@ -168,57 +200,91 @@ export default function ConfiguracoesPage() {
                 Logotipo da Empresa
               </CardTitle>
               <CardDescription className="text-xs">
-                Customize o logo de exibição. Insira um link direto de imagem ou escolha um preset.
+                Customize o logo de exibição. Insira um link direto de imagem para a sua empresa.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="logoUrl">URL do Logotipo</Label>
-                <Input
-                  id="logoUrl"
-                  type="url"
-                  placeholder="https://exemplo.com/sua-logo.png"
-                  value={logoUrl}
-                  onChange={(e) => setLogoUrl(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Ou escolha uma logo artística de demonstração:</Label>
-                <div className="grid grid-cols-4 gap-3">
-                  {SAMPLE_LOGOS.map((logo) => (
-                    <button
-                      key={logo.name}
-                      type="button"
-                      onClick={() => {
-                        setLogoUrl(logo.url);
-                        toast.info(`Logo "${logo.name}" selecionado!`);
-                      }}
-                      className={`relative group rounded-md border p-1 bg-zinc-50 dark:bg-zinc-900 transition-all ${
-                        logoUrl === logo.url 
-                          ? 'border-primary ring-2 ring-primary/20' 
-                          : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300'
-                      }`}
-                    >
+            <CardContent>
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                {/* Preview da Logo (Primeiro) */}
+                <div className="relative shrink-0 flex flex-col items-center gap-1">
+                  <div className="h-20 w-20 rounded-lg border border-dashed border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center overflow-hidden p-1 shadow-sm">
+                    {logoUrl.trim() !== '' && !logoError ? (
                       <img 
-                        src={logo.url} 
-                        alt={logo.name} 
-                        className="h-10 w-full rounded object-cover"
+                        src={logoUrl} 
+                        alt="Preview do Logotipo" 
+                        className="max-h-full max-w-full object-contain rounded"
                         referrerPolicy="no-referrer"
+                        onError={() => setLogoError(true)}
                       />
-                      <div className="text-[10px] text-center mt-1 truncate text-zinc-500 dark:text-zinc-400 font-medium pb-0.5">
-                        {logo.name}
+                    ) : logoUrl.trim() !== '' && logoError ? (
+                      <div className="text-[10px] text-rose-500 font-medium text-center px-1">
+                        Erro na imagem
                       </div>
-                      {logoUrl === logo.url && (
-                        <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-0.5 shadow-sm">
-                          <Check className="h-2 w-2" />
-                        </div>
-                      )}
-                    </button>
-                  ))}
+                    ) : (
+                      <Building2 className="h-8 w-8 text-zinc-300 dark:text-zinc-700" />
+                    )}
+                  </div>
+                  <span className="text-[10px] text-zinc-400 font-medium">Preview</span>
+                </div>
+
+                {/* Input da URL (Ao lado) */}
+                <div className="flex-1 w-full space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="logoUrl" className="text-xs font-semibold">URL do Logotipo</Label>
+                    {logoUrl.trim() !== '' && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-5 px-1.5 text-[10px] text-zinc-500 hover:text-rose-600 dark:hover:text-rose-400"
+                        onClick={() => {
+                          setLogoUrl('');
+                          setLogoError(false);
+                        }}
+                      >
+                        Remover URL
+                      </Button>
+                    )}
+                  </div>
+                  <Input
+                    id="logoUrl"
+                    type="url"
+                    placeholder="https://exemplo.com/sua-logo.png"
+                    value={logoUrl}
+                    onChange={(e) => setLogoUrl(e.target.value)}
+                  />
+                  {logoError && logoUrl.trim() !== '' && (
+                    <p className="text-[11px] text-rose-500">
+                      Não foi possível carregar a imagem da URL fornecida.
+                    </p>
+                  )}
+                  <p className="text-[11px] text-muted-foreground">
+                    Link direto da imagem do logotipo para relatórios e documentos.
+                  </p>
                 </div>
               </div>
             </CardContent>
+            <CardFooter className="flex items-center justify-end gap-2 border-t pt-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm"
+                onClick={handleCancel}
+                disabled={isSubmitting}
+                id="btn-cancelar-card-logo"
+              >
+                Cancelar
+              </Button>
+              <Button 
+                type="submit" 
+                size="sm"
+                disabled={isSubmitting} 
+                className="font-semibold shadow"
+                id="btn-salvar-card-logo"
+              >
+                {isSubmitting ? 'Salvando...' : 'Salvar'}
+              </Button>
+            </CardFooter>
           </Card>
 
           {/* Card 3: Cores do Tema */}
@@ -259,14 +325,30 @@ export default function ConfiguracoesPage() {
                 ))}
               </div>
             </CardContent>
+            <CardFooter className="flex items-center justify-end gap-2 border-t pt-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm"
+                onClick={handleCancel}
+                disabled={isSubmitting}
+                id="btn-cancelar-card-tema"
+              >
+                Cancelar
+              </Button>
+              <Button 
+                type="submit" 
+                size="sm"
+                disabled={isSubmitting} 
+                className="font-semibold shadow"
+                id="btn-salvar-card-tema"
+              >
+                {isSubmitting ? 'Salvando...' : 'Salvar'}
+              </Button>
+            </CardFooter>
           </Card>
 
-          {/* Botão de Form Submission */}
-          <div className="flex justify-end pt-2">
-            <Button type="submit" disabled={isSubmitting} className="font-semibold shadow px-6">
-              {isSubmitting ? 'Salvando...' : 'Salvar Alterações'}
-            </Button>
-          </div>
+
         </form>
 
         {/* Simulador / Preview Lado-Lado */}
