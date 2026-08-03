@@ -125,16 +125,17 @@ export default function OrcamentosPage() {
   }
 
   return (
-    <div id="orcamentos-container" className="space-y-6 py-12">
+    <div id="orcamentos-container" className="space-y-6 pt-12 max-sm:pt-14">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Orçamentos</h2>
-          <p className="text-muted-foreground text-sm">Gerencie seus orçamentos e propostas comerciais.</p>
+          <h2 className="text-2xl max-sm:text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Orçamentos</h2>
+          <p className="text-muted-foreground text-xs sm:text-sm">Gerencie seus orçamentos.</p>
         </div>
         <Link href="/orcamentos/novo">
           <Button className="font-semibold">
           <Plus/>
-          Novo Orçamento</Button>
+          <span className="max-sm:hidden">Novo Orçamento</span>
+          </Button>
         </Link>
       </div>
 
