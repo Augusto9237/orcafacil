@@ -15,8 +15,9 @@ import { Search, Eye, Pencil, Trash2, Info, Layers, DollarSign, Calendar, Tag, F
 import { NovoProdutoSheet } from '@/components/produtos/NovoProdutoSheet';
 import { EditarProdutoSheet } from '@/components/produtos/EditarProdutoSheet';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import Link from 'next/link';
-import { doc, deleteDoc } from 'firebase/firestore';
+import { doc, deleteDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { toast } from 'sonner';
 import {
@@ -78,6 +79,35 @@ export default function ProdutosPage() {
     }
   };
 
+  // State and Handler for Toggle Status (Ativar / Inativar)
+  const [atualizandoStatusId, setAtualizandoStatusId] = useState<string | null>(null);
+
+  const handleToggleStatus = async (produtoId: string, novoStatus: boolean, nomeProduto: string) => {
+    setAtualizandoStatusId(produtoId);
+    try {
+      const docRef = doc(db, 'produtos', produtoId);
+      await updateDoc(docRef, {
+        ativo: novoStatus,
+        atualizadoEm: serverTimestamp(),
+      });
+      toast.success(`Produto "${nomeProduto}" ${novoStatus ? 'ativado' : 'inativado'} com sucesso!`);
+    } catch (error) {
+      console.error('Erro ao atualizar status do produto:', error);
+      toast.error('Erro ao alterar o status do produto.');
+    } finally {
+      setAtualizandoStatusId(null);
+    }
+  };
+
+  // Helper to format currency in Real (BRL) using native JS Intl API
+  const formatarMoedaBRL = (valor: number | string) => {
+    const num = typeof valor === 'number' ? valor : parseFloat(String(valor)) || 0;
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(num);
+  };
+
   // Format date helper
   const formatDate = (criadoEm: any) => {
     if (!criadoEm) return '-';
@@ -102,28 +132,29 @@ export default function ProdutosPage() {
   });
 
   return (
-    <div className="space-y-6 py-12">
-      <div className="flex items-center justify-between">
-        <div>
+    <div className="space-y-6 w-full">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full">
+        <div className="w-full sm:w-auto">
           <h2 className="text-2xl font-bold tracking-tight">Produtos</h2>
           <p className="text-muted-foreground text-xs">Gerencie seu catálogo de produtos.</p>
         </div>
         <NovoProdutoSheet>
-          <Button>
-          <Plus/>
-          Novo Produto</Button>
+          <Button className="w-full sm:w-auto flex items-center justify-center gap-2">
+            <Plus className="h-4 w-4" />
+            Novo Produto
+          </Button>
         </NovoProdutoSheet>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <div className="max-w-md w-full relative">
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between w-full">
+        <div className="w-full sm:max-w-md relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             id="buscar-produtos"
             placeholder="Buscar produtos por nome..."
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
-            className="pl-9"
+            className="pl-9 w-full"
           />
         </div>
 
@@ -141,7 +172,7 @@ export default function ProdutosPage() {
         </div>
       </div>
 
-      <div className="rounded-md border bg-white shadow-sm dark:bg-zinc-950 overflow-hidden">
+      <div className="rounded-md border bg-white shadow-sm dark:bg-zinc-950 overflow-x-auto w-full">
         {produtos.length === 0 ? (
           <p className="text-center text-muted-foreground py-12">Nenhum produto cadastrado.</p>
         ) : produtosFiltrados.length === 0 ? (
@@ -191,27 +222,38 @@ export default function ProdutosPage() {
                     {produto.nome}
                   </TableCell>
                   <TableCell className="font-medium font-mono text-zinc-900 dark:text-zinc-100">
-                    R$ {produto.precoUnitario.toFixed(2)}
+                    {formatarMoedaBRL(produto.precoUnitario)}
                   </TableCell>
                   <TableCell className="text-zinc-550 dark:text-zinc-400">
                     {produto.unidade}
                   </TableCell>
                   <TableCell>
-                    {produto.ativo !== false ? (
-                      <Badge
-                        id={`produto-status-${produto.id}`}
-                        className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-none hover:bg-emerald-100 dark:hover:bg-emerald-900/40 cursor-default"
-                      >
-                        Ativo
-                      </Badge>
-                    ) : (
-                      <Badge
-                        id={`produto-status-${produto.id}`}
-                        className="bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400 border-none hover:bg-zinc-200 dark:hover:bg-zinc-700 cursor-default"
-                      >
-                        Inativo
-                      </Badge>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id={`switch-status-${produto.id}`}
+                        checked={produto.ativo !== false}
+                        disabled={atualizandoStatusId === produto.id}
+                        onCheckedChange={(checked) => handleToggleStatus(produto.id, checked, produto.nome)}
+                        aria-label={`Ativar ou inativar ${produto.nome}`}
+                      />
+                      {produto.ativo !== false ? (
+                        <Badge
+                          id={`produto-status-${produto.id}`}
+                          className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-none hover:bg-emerald-100 dark:hover:bg-emerald-900/40 cursor-pointer"
+                          onClick={() => handleToggleStatus(produto.id, false, produto.nome)}
+                        >
+                          Ativo
+                        </Badge>
+                      ) : (
+                        <Badge
+                          id={`produto-status-${produto.id}`}
+                          className="bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400 border-none hover:bg-zinc-200 dark:hover:bg-zinc-700 cursor-pointer"
+                          onClick={() => handleToggleStatus(produto.id, true, produto.nome)}
+                        >
+                          Inativo
+                        </Badge>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell className="text-right pr-6" id={`produto-actions-${produto.id}`}>
                     <div className="flex items-center justify-end gap-1.5">

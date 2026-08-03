@@ -259,9 +259,9 @@ function NovoOrcamentoPageContent() {
   };
 
   return (
-    <div className="space-y-6 overflow-hidden max-h-screen min-h-0 py-12">
+    <div className="space-y-6 w-full pb-12">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 ">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full">
         <div className="flex items-center gap-3">
           <Button 
             variant="ghost" 
@@ -272,19 +272,19 @@ function NovoOrcamentoPageContent() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h2 className="text-2xl md:text-2xl font-extrabold tracking-tight text-gray-900 dark:text-zinc-550">
+            <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-gray-900 dark:text-zinc-100">
               {editId ? `Editar Orçamento` : 'Novo Orçamento'}
             </h2>
-            <p className="text-sm text-muted-foreground mt-0.5">
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
               {editId ? 'Atualize as informações desta proposta comercial.' : 'Crie uma proposta comercial de alto padrão para seu cliente.'}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => router.push('/orcamentos')}>
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+          <Button variant="outline" onClick={() => router.push('/orcamentos')} className="flex-1 sm:flex-none">
             Cancelar
           </Button>
-          <Button onClick={handleCreateOrcamento} disabled={isSubmitting} className="min-w-[120px]">
+          <Button onClick={handleCreateOrcamento} disabled={isSubmitting} className="flex-1 sm:flex-none min-w-[120px]">
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -297,19 +297,19 @@ function NovoOrcamentoPageContent() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-0 max-h-[100dvh]">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
         
         {/* Left / Central Workspace: Details and items */}
-        <div className="lg:col-span-2 space-y-6 overflow-y-auto">
+        <div className="lg:col-span-2 space-y-6 w-full">
           
           {/* Section: Cliente Selection & General Info */}
-          <div className="bg-white rounded-xl border dark:bg-zinc-950 p-6 shadow-xs space-y-5">
+          <div className="bg-white rounded-xl border dark:bg-zinc-950 p-4 sm:p-6 shadow-xs space-y-5">
             <div className="flex items-center justify-between border-b pb-4">
-              <h3 className="text-lg font-bold tracking-tight text-gray-900 dark:text-zinc-100 flex items-center gap-2">
+              <h3 className="text-base sm:text-lg font-bold tracking-tight text-gray-900 dark:text-zinc-100 flex items-center gap-2">
                 <User className="h-4 w-4 text-primary" />
                 Cliente
               </h3>
-              <h4 className="text-muted-foreground">
+              <h4 className="text-xs sm:text-sm text-muted-foreground">
                 {suggestedNumber}
               </h4>
             </div>
@@ -396,7 +396,7 @@ function NovoOrcamentoPageContent() {
 
             {/* Client Snapshot display when selected */}
             {selectedCliente && (
-              <div className="bg-muted/50 rounded-lg p-4 text-xs space-y-2 border border-dashed text-muted-foreground transition-all duration-300">
+              <div className="bg-muted/50 rounded-lg p-3 sm:p-4 text-xs space-y-2 border border-dashed text-muted-foreground transition-all duration-300">
                 <p className="font-semibold text-foreground text-sm">{selectedCliente.nome}</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
                   <p><strong>Telefone:</strong> {selectedCliente.telefone}</p>
@@ -413,10 +413,10 @@ function NovoOrcamentoPageContent() {
           </div>
 
           {/* Section: Budget Items */}
-          <div className="bg-white rounded-xl border dark:bg-zinc-950 p-6 shadow-xs space-y-6">
+          <div className="bg-white rounded-xl border dark:bg-zinc-950 p-4 sm:p-6 shadow-xs space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h3 className="text-lg font-bold tracking-tight text-gray-900 dark:text-zinc-100 flex items-center gap-2">
+                <h3 className="text-base sm:text-lg font-bold tracking-tight text-gray-900 dark:text-zinc-100 flex items-center gap-2">
                   <Package className="h-4 w-4 text-primary" />
                   Produtos & Serviços
                 </h3>
@@ -426,12 +426,12 @@ function NovoOrcamentoPageContent() {
               </div>
 
               {/* Multi action triggers */}
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                 <Button 
                   type="button"
                   variant="outline" 
                   size="sm" 
-                  className="h-9 gap-1 hover:bg-neutral-50"
+                  className="h-9 gap-1 hover:bg-neutral-50 w-full sm:w-auto justify-center"
                   onClick={() => setIsProductDialogOpen(true)}
                 >
                   <Plus className="h-4 w-4" />
@@ -452,7 +452,7 @@ function NovoOrcamentoPageContent() {
                   type="button"
                   variant="outline" 
                   size="sm" 
-                  className="h-9 gap-1 hover:bg-neutral-50"
+                  className="h-9 gap-1 hover:bg-neutral-50 w-full sm:w-auto justify-center"
                   onClick={() => setIsServiceDialogOpen(true)}
                 >
                   <Plus className="h-4 w-4" />
@@ -471,14 +471,14 @@ function NovoOrcamentoPageContent() {
 
             {/* List and table of added Items */}
             {itens.length === 0 ? (
-              <div className="rounded-lg border border-dashed p-10 text-center space-y-1 bg-muted/20 text-muted-foreground">
+              <div className="rounded-lg border border-dashed p-6 sm:p-10 text-center space-y-1 bg-muted/20 text-muted-foreground">
                 <ChevronRight className="h-6 w-6 text-muted-foreground/60 mx-auto rotate-90" />
                 <p className="text-sm font-semibold">Nenhum item adicionado</p>
                 <p className="text-xs max-w-sm mx-auto">Utilize os botões acima para buscar produtos ou serviços no seu catálogo e adicioná-los.</p>
               </div>
             ) : (
-              <div className="rounded-md border bg-white shadow-sm dark:bg-zinc-950 overflow-hidden">
-                <Table>
+              <div className="rounded-md border bg-white shadow-sm dark:bg-zinc-950 overflow-x-auto w-full">
+                <Table className="min-w-[640px]">
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-[110px] font-semibold">Cod.</TableHead>
@@ -554,8 +554,8 @@ function NovoOrcamentoPageContent() {
           </div>
 
           {/* Remarks Section */}
-          <div className="bg-white rounded-xl border dark:bg-zinc-950 p-6 shadow-xs space-y-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Observações & Anotações</h3>
+          <div className="bg-white rounded-xl border dark:bg-zinc-950 p-4 sm:p-6 shadow-xs space-y-4">
+            <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-muted-foreground">Observações & Anotações</h3>
             
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-muted-foreground">Observações adicionais para o cliente</label>
@@ -564,6 +564,7 @@ function NovoOrcamentoPageContent() {
                 value={observacoes}
                 onChange={(e) => setObservacoes(e.target.value)}
                 rows={4}
+                className="text-sm max-sm:text-sm"
               />
             </div>
           </div>
@@ -571,9 +572,9 @@ function NovoOrcamentoPageContent() {
         </div>
 
         {/* Right Sidebar: Summary and calculations */}
-        <div className="space-y-6">
-          <div className="bg-white rounded-xl border dark:bg-zinc-950 p-6 shadow-xs space-y-6 sticky top-6">
-            <h3 className="font-heading text-lg font-bold tracking-tight text-gray-900 dark:text-zinc-100 pb-4 border-b">
+        <div className="lg:col-span-1 space-y-6 w-full">
+          <div className="bg-white rounded-xl border dark:bg-zinc-950 p-4 sm:p-6 shadow-xs space-y-6 lg:sticky lg:top-6">
+            <h3 className="font-heading text-base sm:text-lg font-bold tracking-tight text-gray-900 dark:text-zinc-100 pb-4 border-b">
               Resumo Operacional
             </h3>
 

@@ -149,22 +149,22 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex-1 space-y-6 h-full p-0.5 pt-12 pb-10">
-      <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-2xl font-bold tracking-tight">Dashboard</h2>
+    <div className="flex-1 space-y-6 h-full p-0.5 pt-12 max-sm:pt-16 pb-10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full">
+        <h2 className="text-2xl font-bold tracking-tight w-full sm:w-auto">Dashboard</h2>
       </div>
 
       {/* Ações Rápidas de Acesso */}
       <Card className="border border-primary/60 dark:border-primary/30 bg-gradient-to-r from-primary/40 via-background/50 dark:from-primary/15 dark:via-zinc-950/10 dark:to-indigo-950/15 shadow-sm">
         <CardContent className="">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="space-y-1 font-sans">
-              <h3 className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Acesso Rápido</h3>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">Atalhos para as operações mais recorrentes do seu dia a dia.</p>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full">
+            <div className="space-y-1 font-sans w-full sm:w-auto">
+              <h3 className="text-sm sm:text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Acesso Rápido</h3>
+              <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">Atalhos para as operações mais recorrentes do seu dia a dia.</p>
             </div>
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
               <Link href="/orcamentos/novo" className="w-full sm:w-auto">
-                <Button>
+                <Button className="w-full sm:w-auto">
                   <FilePlus className="h-4.5 w-4.5" />
                   Novo Orçamento
                 </Button>
@@ -181,7 +181,7 @@ export default function DashboardPage() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">R$ {totalOrcamentosAprovados.toFixed(2)}</div>
+            <div className="text-sm sm:text-2xl font-bold">R$ {totalOrcamentosAprovados.toFixed(2)}</div>
             <p className="text-xs text-muted-foreground">+20.1% em relação ao mês passado</p>
           </CardContent>
         </Card>
@@ -191,7 +191,7 @@ export default function DashboardPage() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+{orcamentos.length}</div>
+            <div className="text-sm sm:text-2xl font-bold">+{orcamentos.length}</div>
             <p className="text-xs text-muted-foreground">Total de orçamentos criados</p>
           </CardContent>
         </Card>
@@ -202,17 +202,17 @@ export default function DashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+{clientes.length}</div>
+            <div className="text-sm sm:text-2xl font-bold">+{clientes.length}</div>
             <p className="text-xs text-muted-foreground">Clientes cadastrados na base</p>
           </CardContent>
         </Card>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
+        <Card className="col-span-4 max-md:col-span-2">
           <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1">
-              <CardTitle>Visão Geral de Orçamentos</CardTitle>
+              <CardTitle className="text-sm sm:text-base font-semibold">Visão Geral de Orçamentos</CardTitle>
               <CardDescription className="text-xs">
                 {filtro === 'semanal' && "Detalhamento diário dos orçamentos ativos na semana atual"}
                 {filtro === 'mensal' && "Distribuição semanal dos orçamentos ativos no mês atual"}
@@ -298,9 +298,9 @@ export default function DashboardPage() {
             </ResponsiveContainer>
           </CardContent>
         </Card>
-        <Card className="col-span-3">
+        <Card className="col-span-3 max-md:col-span-2">
           <CardHeader>
-            <CardTitle>Resumo por Categoria</CardTitle>
+            <CardTitle className="text-sm sm:text-base font-semibold">Resumo por Categoria</CardTitle>
             <CardDescription className="text-xs">Distribuição financeira por situação dos orçamentos</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
