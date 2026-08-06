@@ -132,21 +132,23 @@ export default function ProdutosPage() {
   });
 
   return (
-    <div className="space-y-6 w-full">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full">
+    <div className="space-y-6 max-sm:pt-16 pt-12 w-full">
+      <div className="flex items-center justify-between gap-4 w-full">
         <div className="w-full sm:w-auto">
           <h2 className="text-2xl font-bold tracking-tight">Produtos</h2>
           <p className="text-muted-foreground text-xs">Gerencie seu catálogo de produtos.</p>
         </div>
         <NovoProdutoSheet>
-          <Button className="w-full sm:w-auto flex items-center justify-center gap-2">
+          <Button className="flex items-center justify-center gap-2">
             <Plus className="h-4 w-4" />
+            <span className="max-sm:hidden">
             Novo Produto
+            </span>
           </Button>
         </NovoProdutoSheet>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between w-full">
+      <div className="flex gap-4 items-center justify-between w-full">
         <div className="w-full sm:max-w-md relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -158,7 +160,7 @@ export default function ProdutosPage() {
           />
         </div>
 
-        <div className="w-full sm:w-48">
+        <div className="w-20  sm:w-48">
           <Select value={statusFiltro} onValueChange={setStatusFiltro}>
             <SelectTrigger id="status-filtro-produtos" className="w-full">
               <SelectValue placeholder="Status" />
