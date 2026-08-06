@@ -110,21 +110,24 @@ export default function ClientesPage() {
   };
 
   return (
-    <div className="space-y-6 flex-1 h-full py-12">
-      <div className="flex max-sm:flex-col sm:items-center justify-between gap-4">
+    <div className="space-y-6 flex-1 h-full py-12 max-sm:pt-16">
+      <div className="flex items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Clientes</h2>
-          <p className="text-muted-foreground text-sm">Gerencie seus clientes.</p>
+          <p className="text-muted-foreground text-sm max-sm:text-xs">Gerencie seus clientes.</p>
         </div>
         <NovoClienteSheet>
           <Button>
-          <UserPlus />
-          Novo Cliente</Button>
+          <Plus/>
+          <span className="max-sm:hidden">
+          Novo Cliente
+          </span>
+          </Button>
         </NovoClienteSheet>
       </div>
 
-      <div className="flex items-center w-full justify-between">
-        <div className="flex-1 max-w-md relative">
+      <div className="flex items-center gap-4 w-full justify-between">
+        <div className="flex-1 w-full sm:max-w-md  relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar clientes por nome ou CPF/CNPJ..."
@@ -133,7 +136,7 @@ export default function ClientesPage() {
             className="pl-9 w-full"
           />
         </div>
-        <div className="w-full sm:w-48">
+        <div className="w-20 sm:w-48">
           <Select value={filtroTipo} onValueChange={setFiltroTipo}>
             <SelectTrigger className="w-full bg-white dark:bg-zinc-950">
               <SelectValue placeholder="Filtrar por tipo" />

@@ -4,10 +4,9 @@ import { useServicos } from '@/hooks/useServicos';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
-import { Search, Eye, Pencil, Trash2, CheckCircle2, XCircle } from 'lucide-react';
+import { Search, Eye, Pencil, Trash2, CheckCircle2, XCircle, Plus } from 'lucide-react';
 import { NovoServicoSheet } from '@/components/servicos/NovoServicoSheet';
 import { EditarServicoSheet } from '@/components/servicos/EditarServicoSheet';
-import Link from 'next/link';
 import { doc, deleteDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { toast } from 'sonner';
@@ -91,18 +90,21 @@ export default function ServicosPage() {
   });
 
   return (
-    <div className="space-y-6 py-12">
+    <div className="space-y-6 py-12 max-sm:pt-16">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Serviços</h2>
+          <h2 className="text-2xl max-sm:text-xl font-bold tracking-tight">Serviços</h2>
           <p className="text-muted-foreground text-xs">Gerencie seus serviços prestados.</p>
         </div>
         <NovoServicoSheet>
-          <Button>Novo Serviço</Button>
+          <Button>
+          <Plus/>
+          <span className="max-sm:hidden">Novo Serviço</span>
+          </Button>
         </NovoServicoSheet>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+      <div className="flex gap-4 items-center justify-between">
         <div className="max-w-md w-full relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -114,7 +116,7 @@ export default function ServicosPage() {
           />
         </div>
         
-        <div className="w-full sm:w-48">
+        <div className="w-20 sm:w-48">
           <Select value={statusFiltro} onValueChange={setStatusFiltro}>
             <SelectTrigger id="status-filtro-select" className="w-full">
               <SelectValue placeholder="Status" />

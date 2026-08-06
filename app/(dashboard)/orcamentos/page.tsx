@@ -125,7 +125,7 @@ export default function OrcamentosPage() {
   }
 
   return (
-    <div id="orcamentos-container" className="space-y-6 pt-12 max-sm:pt-14">
+    <div id="orcamentos-container" className="space-y-6 pt-12 max-sm:pt-16">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl max-sm:text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Orçamentos</h2>

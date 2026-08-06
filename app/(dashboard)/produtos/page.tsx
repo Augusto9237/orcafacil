@@ -135,7 +135,7 @@ export default function ProdutosPage() {
     <div className="space-y-6 max-sm:pt-16 pt-12 w-full">
       <div className="flex items-center justify-between gap-4 w-full">
         <div className="w-full sm:w-auto">
-          <h2 className="text-2xl font-bold tracking-tight">Produtos</h2>
+          <h2 className="text-2xl max-sm:text-xl font-bold tracking-tight">Produtos</h2>
           <p className="text-muted-foreground text-xs">Gerencie seu catálogo de produtos.</p>
         </div>
         <NovoProdutoSheet>
