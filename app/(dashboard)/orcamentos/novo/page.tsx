@@ -259,7 +259,7 @@ function NovoOrcamentoPageContent() {
   };
 
   return (
-    <div className="space-y-6 w-full pb-12">
+    <div className="space-y-6 pt-12 max-sm:pt-16 w-full pb-12">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full">
         <div className="flex items-center gap-3">
@@ -414,7 +414,7 @@ function NovoOrcamentoPageContent() {
 
           {/* Section: Budget Items */}
           <div className="bg-white rounded-xl border dark:bg-zinc-950 p-4 sm:p-6 shadow-xs space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row max-md:flex-col sm:items-center justify-between gap-4">
               <div>
                 <h3 className="text-base sm:text-lg font-bold tracking-tight text-gray-900 dark:text-zinc-100 flex items-center gap-2">
                   <Package className="h-4 w-4 text-primary" />
@@ -573,7 +573,7 @@ function NovoOrcamentoPageContent() {
 
         {/* Right Sidebar: Summary and calculations */}
         <div className="lg:col-span-1 space-y-6 w-full">
-          <div className="bg-white rounded-xl border dark:bg-zinc-950 p-4 sm:p-6 shadow-xs space-y-6 lg:sticky lg:top-6">
+          <div className="bg-white rounded-xl border dark:bg-zinc-950 p-4 sm:p-6 shadow-xs space-y-6 ">
             <h3 className="font-heading text-base sm:text-lg font-bold tracking-tight text-gray-900 dark:text-zinc-100 pb-4 border-b">
               Resumo Operacional
             </h3>

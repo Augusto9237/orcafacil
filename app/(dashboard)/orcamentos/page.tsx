@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useOrcamentos } from '@/hooks/useOrcamentos';
+import { formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
@@ -203,7 +204,7 @@ export default function OrcamentosPage() {
                     {formatDate(orcamento.criadoEm)}
                   </TableCell>
                   <TableCell className="font-medium font-mono text-zinc-900 dark:text-zinc-100">
-                    R$ {orcamento.total.toFixed(2)}
+                    {formatCurrency(orcamento.total)}
                   </TableCell>
                   <TableCell>
                     {getStatusBadge(orcamento.status)}

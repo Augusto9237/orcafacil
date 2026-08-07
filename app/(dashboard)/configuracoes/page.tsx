@@ -99,7 +99,7 @@ export default function ConfiguracoesPage() {
   return (
     <div className="space-y-6 pt-12">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Configurações</h2>
+        <h2 className="text-2xl max-sm:text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Configurações</h2>
         <p className="text-muted-foreground text-xs md:text-sm">Personalize os dados e a identidade visual da sua empresa para orçamentos.</p>
       </div>
 
@@ -353,7 +353,7 @@ export default function ConfiguracoesPage() {
 
         {/* Simulador / Preview Lado-Lado */}
         <div className="lg:col-span-2 space-y-6">
-          <Card className="border shadow-md bg-white dark:bg-zinc-950 sticky top-24 overflow-hidden border-zinc-200/90 dark:border-zinc-800/90">
+          <Card className="border shadow-md bg-white dark:bg-zinc-950 top-24 overflow-hidden border-zinc-200/90 dark:border-zinc-800/90">
             <CardHeader className="">
               <CardTitle className="font-bold flex items-center gap-2 text-zinc-800 dark:text-zinc-200">
                 <Eye className="h-4 w-4" />

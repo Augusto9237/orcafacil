@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 import { useOrcamentos } from '@/hooks/useOrcamentos';
 import { useOrdensDeServico } from '@/hooks/useOrdensDeServico';
 import { useClientes } from '@/hooks/useClientes';
@@ -181,7 +181,7 @@ export default function DashboardPage() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-sm sm:text-2xl font-bold">R$ {totalOrcamentosAprovados.toFixed(2)}</div>
+            <div className="text-sm sm:text-2xl font-bold">{formatCurrency(totalOrcamentosAprovados)}</div>
             <p className="text-xs text-muted-foreground">+20.1% em relação ao mês passado</p>
           </CardContent>
         </Card>
@@ -285,7 +285,7 @@ export default function DashboardPage() {
                   tickFormatter={(value) => `R$ ${value}`} 
                 />
                 <Tooltip 
-                  formatter={(value: any) => [`R$ ${Number(value).toFixed(2)}`, 'Total Orçado']}
+                  formatter={(value: any) => [formatCurrency(Number(value)), 'Total Orçado']}
                   labelFormatter={(label) => {
                     if (filtro === 'semanal') return `Dia: ${label}`;
                     if (filtro === 'mensal') return `Período: ${label}`;
@@ -307,7 +307,7 @@ export default function DashboardPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="font-semibold text-emerald-600 dark:text-emerald-400">Aprovados ({aprovadosCount})</span>
-                <span className="font-mono font-bold text-zinc-950 dark:text-zinc-50">R$ {aprovadosTotal.toFixed(2)}</span>
+                <span className="font-mono font-bold text-zinc-950 dark:text-zinc-50">{formatCurrency(aprovadosTotal)}</span>
               </div>
               <Progress 
                 value={totalAtivo > 0 ? (aprovadosTotal / totalAtivo) * 100 : 0} 
@@ -318,7 +318,7 @@ export default function DashboardPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="font-semibold text-primary dark:text-primary">Enviados ({enviadosCount})</span>
-                <span className="font-mono font-bold text-zinc-950 dark:text-zinc-50">R$ {enviadosTotal.toFixed(2)}</span>
+                <span className="font-mono font-bold text-zinc-950 dark:text-zinc-50">{formatCurrency(enviadosTotal)}</span>
               </div>
               <Progress 
                 value={totalAtivo > 0 ? (enviadosTotal / totalAtivo) * 100 : 0} 
@@ -328,7 +328,7 @@ export default function DashboardPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="font-semibold text-zinc-500 dark:text-zinc-400">Rascunhos ({rascunhosCount})</span>
-                <span className="font-mono font-bold">R$ {rascunhosTotal.toFixed(2)}</span>
+                <span className="font-mono font-bold">{formatCurrency(rascunhosTotal)}</span>
               </div>
               <Progress 
                 value={totalAtivo > 0 ? (rascunhosTotal / totalAtivo) * 100 : 0} 
@@ -338,7 +338,7 @@ export default function DashboardPage() {
 
             <div className="pt-2 border-t border-dashed flex justify-between items-center text-xs text-muted-foreground">
               <span>Potencial de Faturamento Ativo:</span>
-              <span className="font-mono font-bold text-zinc-900 dark:text-zinc-100">R$ {totalAtivo.toFixed(2)}</span>
+              <span className="font-mono font-bold text-zinc-900 dark:text-zinc-100">{formatCurrency(totalAtivo)}</span>
             </div>
           </CardContent>
         </Card>
