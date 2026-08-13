@@ -1,15 +1,17 @@
 'use client';
 import { useState } from 'react';
 import { useServicos } from '@/hooks/useServicos';
+import { formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Search, Eye, Pencil, Trash2, CheckCircle2, XCircle, Plus } from 'lucide-react';
 import { NovoServicoSheet } from '@/components/servicos/NovoServicoSheet';
 import { EditarServicoSheet } from '@/components/servicos/EditarServicoSheet';
-import { doc, deleteDoc } from 'firebase/firestore';
+import { doc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { toast } from 'sonner';
+import { Switch } from '@/components/ui/switch';
 import {
   Dialog,
   DialogContent,
@@ -57,6 +59,21 @@ export default function ServicosPage() {
   // State for Delete Service
   const [excluindoServico, setExcluindoServico] = useState<any>(null);
   const [excluindo, setExcluindo] = useState(false);
+  const [atualizandoStatusId, setAtualizandoStatusId] = useState<string | null>(null);
+
+  const handleToggleStatus = async (id: string, novoAtivo: boolean, nome: string) => {
+    setAtualizandoStatusId(id);
+    try {
+      const docRef = doc(db, 'servicos', id);
+      await updateDoc(docRef, { ativo: novoAtivo });
+      toast.success(`Serviço "${nome}" ${novoAtivo ? 'ativado' : 'desativado'} com sucesso!`);
+    } catch (error) {
+      console.error('Erro ao atualizar status do serviço:', error);
+      toast.error('Erro ao atualizar o status do serviço.');
+    } finally {
+      setAtualizandoStatusId(null);
+    }
+  };
 
   // Handle Confirm Delete
   const handleConfirmDelete = async () => {
@@ -161,19 +178,31 @@ export default function ServicosPage() {
                     {servico.nome}
                   </TableCell>
                   <TableCell className="font-medium font-mono text-zinc-900 dark:text-zinc-100">
-                    R$ {servico.precoUnitario.toFixed(2)}
+                    {formatCurrency(servico.precoUnitario)}
                   </TableCell>
                   <TableCell className="text-zinc-550 dark:text-zinc-400">
                     {servico.unidade}
                   </TableCell>
                   <TableCell>
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ${
-                      servico.ativo !== false
-                        ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'
-                        : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400'
-                    }`}>
-                      {servico.ativo !== false ? 'Ativo' : 'Inativo'}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id={`switch-status-servico-${servico.id}`}
+                        checked={servico.ativo !== false}
+                        disabled={atualizandoStatusId === servico.id}
+                        onCheckedChange={(checked) => handleToggleStatus(servico.id, checked, servico.nome)}
+                        aria-label={`Ativar ou inativar ${servico.nome}`}
+                      />
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium cursor-pointer ${
+                          servico.ativo !== false
+                            ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'
+                            : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400'
+                        }`}
+                        onClick={() => handleToggleStatus(servico.id, servico.ativo === false, servico.nome)}
+                      >
+                        {servico.ativo !== false ? 'Ativo' : 'Inativo'}
+                      </span>
+                    </div>
                   </TableCell>
                   <TableCell className="text-right pr-6" id={`servico-actions-${servico.id}`}>
                     <div className="flex items-center justify-end gap-1.5">

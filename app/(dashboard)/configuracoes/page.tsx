@@ -73,13 +73,16 @@ export default function ConfiguracoesPage() {
 
   const handleSelectTheme = async (themeId: string) => {
     setCorTema(themeId);
-    try {
-      await atualizarPerfil({ corTema: themeId });
+  };
+
+  const handleSaveTheme = async () => {
+     try {
+      await atualizarPerfil({ corTema});
       toast.success(`Tema alterado com sucesso!`);
     } catch (err) {
       toast.error('Erro ao salvar tema');
     }
-  };
+  }
 
   if (carregandoAuth) {
     return (
@@ -337,9 +340,9 @@ export default function ConfiguracoesPage() {
                 Cancelar
               </Button>
               <Button 
-                type="submit" 
-                size="sm"
-                disabled={isSubmitting} 
+                type="button" 
+                size="sm" 
+                onClick={handleSaveTheme}
                 className="font-semibold shadow"
                 id="btn-salvar-card-tema"
               >
