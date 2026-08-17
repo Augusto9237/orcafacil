@@ -14,7 +14,6 @@ import {
 import { Search, Eye, Pencil, Trash2, Info, Layers, DollarSign, Calendar, Tag, FileText, CheckCircle2, XCircle, Package, PackagePlus, Plus } from 'lucide-react';
 import { NovoProdutoSheet } from '@/components/produtos/NovoProdutoSheet';
 import { EditarProdutoSheet } from '@/components/produtos/EditarProdutoSheet';
-import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import Link from 'next/link';
 import { doc, deleteDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
@@ -230,7 +229,7 @@ export default function ProdutosPage() {
                     {produto.unidade}
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center">
                       <Switch
                         id={`switch-status-${produto.id}`}
                         checked={produto.ativo !== false}
@@ -238,23 +237,6 @@ export default function ProdutosPage() {
                         onCheckedChange={(checked) => handleToggleStatus(produto.id, checked, produto.nome)}
                         aria-label={`Ativar ou inativar ${produto.nome}`}
                       />
-                      {produto.ativo !== false ? (
-                        <Badge
-                          id={`produto-status-${produto.id}`}
-                          className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-none hover:bg-emerald-100 dark:hover:bg-emerald-900/40 cursor-pointer"
-                          onClick={() => handleToggleStatus(produto.id, false, produto.nome)}
-                        >
-                          Ativo
-                        </Badge>
-                      ) : (
-                        <Badge
-                          id={`produto-status-${produto.id}`}
-                          className="bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400 border-none hover:bg-zinc-200 dark:hover:bg-zinc-700 cursor-pointer"
-                          onClick={() => handleToggleStatus(produto.id, true, produto.nome)}
-                        >
-                          Inativo
-                        </Badge>
-                      )}
                     </div>
                   </TableCell>
                   <TableCell className="text-right pr-6" id={`produto-actions-${produto.id}`}>

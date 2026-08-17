@@ -17,12 +17,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { User, CalendarClock, MapPin, Mail, Loader2 } from 'lucide-react';
+import { User, CalendarClock, MapPin, Share2 } from 'lucide-react';
 import type { Orcamento } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import { DownloadOrcamentoButton } from '@/components/PDFDownloadButtons';
-import { OrcamentoPDF } from '@/components/OrcamentoPDF';
-import { toast } from 'sonner';
+import { CompartilharOrcamentoDialog } from '@/components/orcamentos/CompartilharOrcamentoDialog';
 
 interface VisualizarOrcamentoDialogProps {
   orcamento: Orcamento | undefined;
@@ -40,7 +39,7 @@ export function VisualizarOrcamentoDialog({
   atualizandoStatus,
 }: VisualizarOrcamentoDialogProps) {
   const { perfil } = useAuth();
-  const [enviandoEmail, setEnviandoEmail] = useState(false);
+  const [compartilharDialogOpen, setCompartilharDialogOpen] = useState(false);
 
   const formatDate = (criadoEm: any) => {
     if (!criadoEm) return '-';
@@ -48,46 +47,6 @@ export function VisualizarOrcamentoDialog({
       return new Date(criadoEm.seconds * 1000).toLocaleDateString('pt-BR');
     }
     return new Date(criadoEm).toLocaleDateString('pt-BR');
-  };
-
-  const handleEnviarEmailPadrao = async () => {
-    if (!orcamento) return;
-    setEnviandoEmail(true);
-    try {
-      // 1. Generate and download PDF
-      const { pdf } = await import('@react-pdf/renderer');
-      const blob = await pdf(<OrcamentoPDF orcamento={orcamento} empresa={perfil} />).toBlob();
-      
-      const fileName = `Orcamento-${orcamento.numero || orcamento.id}.pdf`;
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      // 2. Open default mail client on user's device
-      const emailDestino = orcamento.cliente?.email || '';
-      const assunto = `Orçamento Nº ${orcamento.numero} - ${perfil?.nome || 'Proposta Comercial'}`;
-      const corpo = `Olá, ${orcamento.cliente?.nome || 'Cliente'}!\n\nSegue em anexo a proposta comercial referente ao orçamento nº ${orcamento.numero}.\n\nFicamos à disposição para qualquer dúvida.\n\nAtenciosamente,\n${perfil?.nome || 'Nossa Empresa'}\n${perfil?.telefone ? `Telefone: ${perfil.telefone}\n` : ''}`;
-
-      const mailtoUrl = `mailto:${encodeURIComponent(emailDestino)}?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(corpo)}`;
-      window.location.href = mailtoUrl;
-
-      // 3. Update status to 'enviado' if currently 'rascunho'
-      if (orcamento.status === 'rascunho') {
-        await onUpdateStatus(orcamento.id, 'enviado');
-      }
-
-      toast.success('Software de e-mail aberto! O PDF do orçamento foi baixado para anexar.');
-    } catch (error) {
-      console.error('Erro ao preparar envio por e-mail:', error);
-      toast.error('Ocorreu um erro ao preparar o e-mail ou gerar o PDF.');
-    } finally {
-      setEnviandoEmail(false);
-    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -109,19 +68,20 @@ export function VisualizarOrcamentoDialog({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto" id="visualizar-orcamento-dialog-content">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold flex items-center justify-between gap-3" id="visualizar-orcamento-title">
-            <div className="flex items-center gap-2">
-              <span>Orçamento {orcamento?.numero}</span>
-              {orcamento && getStatusBadge(orcamento.status)}
-            </div>
-          </DialogTitle>
-          <DialogDescription className="pt-1">
-            Visualize os dados completos do orçamento e gerencie o status da proposta comercial.
-          </DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto" id="visualizar-orcamento-dialog-content">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold flex items-center justify-between gap-3" id="visualizar-orcamento-title">
+              <div className="flex items-center gap-2">
+                <span>Orçamento {orcamento?.numero}</span>
+                {orcamento && getStatusBadge(orcamento.status)}
+              </div>
+            </DialogTitle>
+            <DialogDescription className="pt-1">
+              Visualize os dados completos do orçamento e gerencie o status da proposta comercial.
+            </DialogDescription>
+          </DialogHeader>
 
         {orcamento ? (
           <div className="space-y-6 py-2">
@@ -278,24 +238,20 @@ export function VisualizarOrcamentoDialog({
                   </Select>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
                   <Button
-                    id="btn-enviar-email-padrao"
-                    size="sm"
-                    variant="outline"
-                    className="h-8 text-xs flex items-center gap-1.5 border-zinc-200 dark:border-zinc-800"
-                    disabled={enviandoEmail}
-                    onClick={handleEnviarEmailPadrao}
+                    id="btn-compartilhar-orcamento"
+                    onClick={() => setCompartilharDialogOpen(true)}
                   >
-                    {enviandoEmail ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin text-zinc-500" />
-                    ) : (
-                      <Mail className="h-3.5 w-3.5 text-zinc-500" />
-                    )}
-                    <span>Enviar por E-mail</span>
+                    <Share2 className="h-3.5 w-3.5" />
+                    <span>Compartilhar</span>
                   </Button>
 
-                  <DownloadOrcamentoButton orcamento={orcamento} empresa={perfil} />
+                  <DownloadOrcamentoButton
+                    orcamento={orcamento}
+                    empresa={perfil}
+                    variant="secondary"
+                  />
                 </div>
               </div>
             </div>
@@ -304,7 +260,16 @@ export function VisualizarOrcamentoDialog({
           <div className="py-8 text-center text-muted-foreground text-xs">Carregando dados...</div>
         )}
       </DialogContent>
-    </Dialog>
+      </Dialog>
+
+      <CompartilharOrcamentoDialog
+        orcamento={orcamento}
+        empresa={perfil}
+        isOpen={compartilharDialogOpen}
+        onOpenChange={setCompartilharDialogOpen}
+        onStatusUpdated={onUpdateStatus}
+      />
+    </>
   );
 }
 

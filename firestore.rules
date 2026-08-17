@@ -6,7 +6,8 @@ service cloud.firestore {
     }
 
     match /usuarios/{userId} {
-      allow read, write: if isOwner(userId);
+      allow get: if true;
+      allow list, write: if isOwner(userId);
     }
 
     match /clientes/{docId} {
@@ -25,7 +26,8 @@ service cloud.firestore {
     }
 
     match /orcamentos/{docId} {
-      allow read, write: if isOwner(resource.data.usuarioId)
+      allow get: if true;
+      allow list, write: if isOwner(resource.data.usuarioId)
         || (request.auth != null && request.resource.data.usuarioId == request.auth.uid);
     }
 
@@ -39,3 +41,4 @@ service cloud.firestore {
     }
   }
 }
+

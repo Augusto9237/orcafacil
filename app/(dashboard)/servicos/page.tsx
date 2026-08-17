@@ -184,7 +184,7 @@ export default function ServicosPage() {
                     {servico.unidade}
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center">
                       <Switch
                         id={`switch-status-servico-${servico.id}`}
                         checked={servico.ativo !== false}
@@ -192,16 +192,6 @@ export default function ServicosPage() {
                         onCheckedChange={(checked) => handleToggleStatus(servico.id, checked, servico.nome)}
                         aria-label={`Ativar ou inativar ${servico.nome}`}
                       />
-                      <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium cursor-pointer ${
-                          servico.ativo !== false
-                            ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'
-                            : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400'
-                        }`}
-                        onClick={() => handleToggleStatus(servico.id, servico.ativo === false, servico.nome)}
-                      >
-                        {servico.ativo !== false ? 'Ativo' : 'Inativo'}
-                      </span>
                     </div>
                   </TableCell>
                   <TableCell className="text-right pr-6" id={`servico-actions-${servico.id}`}>

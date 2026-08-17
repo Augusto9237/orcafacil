@@ -113,7 +113,7 @@ export default function ClientesPage() {
     <div className="space-y-6 flex-1 h-full py-12 max-sm:pt-16">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Clientes</h2>
+          <h2 className="text-2xl max-sm:text-xl font-bold tracking-tight">Clientes</h2>
           <p className="text-muted-foreground text-sm max-sm:text-xs">Gerencie seus clientes.</p>
         </div>
         <NovoClienteSheet>

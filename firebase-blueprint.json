@@ -3,7 +3,7 @@
     {
       "collection": "usuarios",
       "path": "/usuarios/{userId}",
-      "read": "isOwner(userId)",
+      "read": "true",
       "write": "isOwner(userId)"
     },
     {
@@ -27,7 +27,7 @@
     {
       "collection": "orcamentos",
       "path": "/orcamentos/{docId}",
-      "read": "isOwner(resource.data.usuarioId) || (request.auth != null && request.resource.data.usuarioId == request.auth.uid)",
+      "read": "true",
       "write": "isOwner(resource.data.usuarioId) || (request.auth != null && request.resource.data.usuarioId == request.auth.uid)"
     },
     {

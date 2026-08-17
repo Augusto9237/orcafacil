@@ -11,9 +11,18 @@ import type { Orcamento, OrdemServico, Usuario } from '@/types';
 interface DownloadOrcamentoButtonProps {
   orcamento: Orcamento;
   empresa: Usuario | null;
+  className?: string;
+  size?: 'default' | 'sm' | 'lg' | 'icon';
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
 }
 
-export function DownloadOrcamentoButton({ orcamento, empresa }: DownloadOrcamentoButtonProps) {
+export function DownloadOrcamentoButton({
+  orcamento,
+  empresa,
+  className = '',
+  size = 'default',
+  variant = 'default',
+}: DownloadOrcamentoButtonProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -22,7 +31,7 @@ export function DownloadOrcamentoButton({ orcamento, empresa }: DownloadOrcament
 
   if (!mounted) {
     return (
-      <Button variant="default" className="gap-2">
+      <Button variant={variant} size={size} className={`gap-2 ${className}`}>
         <Loader2 className="h-4 w-4 animate-spin" /> Carregando...
       </Button>
     );
@@ -37,7 +46,7 @@ export function DownloadOrcamentoButton({ orcamento, empresa }: DownloadOrcament
       {({ loading, error }) => {
         if (loading) {
           return (
-            <Button disabled variant="default" className="gap-2">
+            <Button disabled variant={variant} size={size} className={`gap-2 ${className}`}>
               <Loader2 className="h-4 w-4 animate-spin" /> Gerando PDF...
             </Button>
           );
@@ -45,14 +54,18 @@ export function DownloadOrcamentoButton({ orcamento, empresa }: DownloadOrcament
         if (error) {
           console.error("Erro PDF: ", error);
           return (
-            <Button variant="destructive" className="gap-2">
+            <Button variant="destructive" size={size} className={`gap-2 ${className}`}>
               Erro ao Gerar PDF
             </Button>
           );
         }
         return (
-          <Button variant="default" className="gap-2 bg-blue-600 hover:bg-blue-700 font-semibold cursor-pointer">
-            <FileDown className="h-4 w-4" /> Exportar PDF
+          <Button
+            variant={variant}
+            size={size}
+            className={`gap-1.5 font-semibold cursor-pointer ${variant === 'default' ? 'bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-zinc-900' : ''} ${className}`}
+          >
+            <FileDown className="h-3.5 w-3.5" /> Baixar PDF
           </Button>
         );
       }}
