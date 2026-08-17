@@ -32,20 +32,20 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { 
-  Plus, 
-  Trash, 
-  Search, 
-  ChevronRight, 
-  Percent, 
-  DollarSign, 
+import {
+  Plus,
+  Trash,
+  Search,
+  ChevronRight,
+  Percent,
+  DollarSign,
   ArrowLeft,
   FileText,
   Badge,
   Package,
   Wrench,
   Loader2,
-User,
+  User,
   Pencil
 } from 'lucide-react';
 import type { ItemOrcamento, Cliente } from '@/types';
@@ -120,7 +120,7 @@ function NovoOrcamentoPageContent() {
   // Client list search
   const [clientSearch, setClientSearch] = useState('');
   const filteredClientes = useMemo(() => {
-    return clientes.filter(c => 
+    return clientes.filter(c =>
       c.nome.toLowerCase().includes(clientSearch.toLowerCase()) ||
       (c.cpfCnpj && c.cpfCnpj.toLowerCase().includes(clientSearch.toLowerCase()))
     );
@@ -263,9 +263,9 @@ function NovoOrcamentoPageContent() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full">
         <div className="flex items-center gap-3">
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => router.push('/orcamentos')}
             className="rounded-full shrink-0"
           >
@@ -280,28 +280,13 @@ function NovoOrcamentoPageContent() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-          <Button variant="outline" onClick={() => router.push('/orcamentos')} className="flex-1 sm:flex-none">
-            Cancelar
-          </Button>
-          <Button onClick={handleCreateOrcamento} disabled={isSubmitting} className="flex-1 sm:flex-none min-w-[120px]">
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Salvando
-              </>
-            ) : (
-              'Salvar'
-            )}
-          </Button>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
-        
+
         {/* Left / Central Workspace: Details and items */}
         <div className="lg:col-span-2 space-y-6 w-full">
-          
+
           {/* Section: Cliente Selection & General Info */}
           <div className="bg-white rounded-xl border dark:bg-zinc-950 p-4 sm:p-6 shadow-xs space-y-5">
             <div className="flex items-center justify-between border-b pb-4">
@@ -323,8 +308,8 @@ function NovoOrcamentoPageContent() {
               ) : (
                 <Dialog open={isClientDialogOpen} onOpenChange={setIsClientDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="w-full justify-between font-normal text-left h-10 px-3 bg-white hover:bg-neutral-50 border border-input dark:bg-zinc-950"
                     >
                       <span className="truncate">
@@ -347,8 +332,8 @@ function NovoOrcamentoPageContent() {
                     <div className="space-y-4 pt-4">
                       <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input 
-                          placeholder="Buscar cliente por nome ou CPF / CNPJ..." 
+                        <Input
+                          placeholder="Buscar cliente por nome ou CPF / CNPJ..."
                           value={clientSearch}
                           onChange={(e) => setClientSearch(e.target.value)}
                           className="pl-9"
@@ -369,9 +354,8 @@ function NovoOrcamentoPageContent() {
                                 setClientSearch('');
                                 toast.success(`Cliente "${c.nome}" selecionado`);
                               }}
-                              className={`w-full text-left p-3 text-xs flex justify-between items-center transition-all hover:bg-neutral-50 ${
-                                clienteId === c.id ? 'bg-primary/5 border-l-2 border-primary' : ''
-                              }`}
+                              className={`w-full text-left p-3 text-xs flex justify-between items-center transition-all hover:bg-neutral-50 ${clienteId === c.id ? 'bg-primary/5 border-l-2 border-primary' : ''
+                                }`}
                             >
                               <div>
                                 <p className="font-semibold text-foreground">{c.nome}</p>
@@ -427,10 +411,10 @@ function NovoOrcamentoPageContent() {
 
               {/* Multi action triggers */}
               <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                <Button 
+                <Button
                   type="button"
-                  variant="outline" 
-                  size="sm" 
+                  variant="outline"
+                  size="sm"
                   className="h-9 gap-1 hover:bg-neutral-50 w-full sm:w-auto justify-center"
                   onClick={() => setIsProductDialogOpen(true)}
                 >
@@ -448,10 +432,10 @@ function NovoOrcamentoPageContent() {
                 />
 
                 {/* Service search dialog trigger */}
-                <Button 
+                <Button
                   type="button"
-                  variant="outline" 
-                  size="sm" 
+                  variant="outline"
+                  size="sm"
                   className="h-9 gap-1 hover:bg-neutral-50 w-full sm:w-auto justify-center"
                   onClick={() => setIsServiceDialogOpen(true)}
                 >
@@ -501,11 +485,10 @@ function NovoOrcamentoPageContent() {
                           {item.descricao}
                         </TableCell>
                         <TableCell>
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ${
-                            item.tipo === 'produto' 
-                              ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300' 
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ${item.tipo === 'produto'
+                              ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300'
                               : 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300'
-                          }`}>
+                            }`}>
                             {item.tipo === 'produto' ? 'Produto' : 'Serviço'}
                           </span>
                         </TableCell>
@@ -556,11 +539,11 @@ function NovoOrcamentoPageContent() {
           {/* Remarks Section */}
           <div className="bg-white rounded-xl border dark:bg-zinc-950 p-4 sm:p-6 shadow-xs space-y-4">
             <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-muted-foreground">Observações & Anotações</h3>
-            
+
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-muted-foreground">Observações adicionais para o cliente</label>
-              <Textarea 
-                placeholder="Insira notas de envio, garantia, observações adicionais..." 
+              <Textarea
+                placeholder="Insira notas de envio, garantia, observações adicionais..."
                 value={observacoes}
                 onChange={(e) => setObservacoes(e.target.value)}
                 rows={4}
@@ -588,24 +571,22 @@ function NovoOrcamentoPageContent() {
               <div className="space-y-2 pt-2 border-t border-dashed">
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground text-xs font-medium">Aplicar Desconto</span>
-                  
+
                   {/* Selector tab value or percentual */}
                   <div className="flex rounded-md border p-0.5 bg-neutral-50/50">
                     <button
                       type="button"
                       onClick={() => setDescontoTipo('valor')}
-                      className={`px-1.5 py-0.5 text-[10px] font-semibold rounded-sm transition-all ${
-                        descontoTipo === 'valor' ? 'bg-white shadow-xs text-foreground font-bold' : 'text-muted-foreground'
-                      }`}
+                      className={`px-1.5 py-0.5 text-[10px] font-semibold rounded-sm transition-all ${descontoTipo === 'valor' ? 'bg-white shadow-xs text-foreground font-bold' : 'text-muted-foreground'
+                        }`}
                     >
                       $ Real
                     </button>
                     <button
                       type="button"
                       onClick={() => setDescontoTipo('percentual')}
-                      className={`px-1.5 py-0.5 text-[10px] font-semibold rounded-sm transition-all ${
-                        descontoTipo === 'percentual' ? 'bg-white shadow-xs text-foreground font-bold' : 'text-muted-foreground'
-                      }`}
+                      className={`px-1.5 py-0.5 text-[10px] font-semibold rounded-sm transition-all ${descontoTipo === 'percentual' ? 'bg-white shadow-xs text-foreground font-bold' : 'text-muted-foreground'
+                        }`}
                     >
                       % Porc.
                     </button>
@@ -688,7 +669,23 @@ function NovoOrcamentoPageContent() {
               </div>
             </div>
 
-            <div className="pt-4 border-t">
+            <div className="pt-4 gap-4 border-t space-y-5">
+              <div className="grid grid-cols-2 items-center">
+                <Button variant="outline" onClick={() => router.push('/orcamentos')} className="flex-1 sm:flex-none">
+                  Cancelar
+                </Button>
+                <Button onClick={handleCreateOrcamento} disabled={isSubmitting} className="flex-1 sm:flex-none min-w-[120px]">
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Salvando
+                    </>
+                  ) : (
+                    'Salvar'
+                  )}
+                </Button>
+              </div>
+
               <Button onClick={handleCreateOrcamento} disabled={isSubmitting} className="w-full h-11 text-sm font-semibold">
                 {isSubmitting ? (
                   <>
