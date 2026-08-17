@@ -669,8 +669,8 @@ function NovoOrcamentoPageContent() {
               </div>
             </div>
 
-            <div className="pt-4 gap-4 border-t space-y-5">
-              <div className="grid grid-cols-2 items-center">
+            <div className="pt-4 border-t space-y-4">
+              <div className="grid grid-cols-2 gap-4 items-center">
                 <Button variant="outline" onClick={() => router.push('/orcamentos')} className="flex-1 sm:flex-none">
                   Cancelar
                 </Button>
