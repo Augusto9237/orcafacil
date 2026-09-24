@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState, use } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { buscarOrcamentoPublico } from '@/actions/orcamentos';
 import type { Orcamento, Usuario } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -47,29 +46,15 @@ export default function OrcamentoPublicoPage({ params }: OrcamentoPublicoPagePro
         setCarregando(true);
         setErro(null);
 
-        const docRef = doc(db, 'orcamentos', id);
-        const docSnap = await getDoc(docRef);
+        const resultado = await buscarOrcamentoPublico(id);
 
-        if (!docSnap.exists()) {
+        if (!resultado) {
           setErro('Orçamento não encontrado ou link expirado.');
           return;
         }
 
-        const orcData = { id: docSnap.id, ...docSnap.data() } as Orcamento;
-        setOrcamento(orcData);
-
-        // Fetch company data if usuarioId exists
-        if (orcData.usuarioId) {
-          try {
-            const userRef = doc(db, 'usuarios', orcData.usuarioId);
-            const userSnap = await getDoc(userRef);
-            if (userSnap.exists()) {
-              setEmpresa({ id: userSnap.id, ...userSnap.data() } as Usuario);
-            }
-          } catch (userErr) {
-            console.warn('Não foi possível carregar dados da empresa:', userErr);
-          }
-        }
+        setOrcamento(resultado.orcamento);
+        setEmpresa(resultado.empresa);
       } catch (err: any) {
         console.error('Erro ao buscar orçamento:', err);
         setErro('Ocorreu um erro ao carregar este orçamento.');

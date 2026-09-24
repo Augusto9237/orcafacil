@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { atualizarProduto } from '@/actions/produtos';
 import { useAuth } from '@/hooks/useAuth';
+import { useDataRefresh } from '@/lib/data-refresh';
 import {
   Sheet,
   SheetContent,
@@ -47,6 +47,7 @@ interface EditarProdutoSheetProps {
 
 export function EditarProdutoSheet({ produto, open, onOpenChange }: EditarProdutoSheetProps) {
   const { usuario } = useAuth();
+  const { refresh } = useDataRefresh();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<any>({
@@ -84,13 +85,14 @@ export function EditarProdutoSheet({ produto, open, onOpenChange }: EditarProdut
 
     setIsSubmitting(true);
     try {
-      const docRef = doc(db, 'produtos', produto.id);
-      await updateDoc(docRef, {
-        ...values,
-        atualizadoEm: serverTimestamp(),
-      });
+      const resultado = await atualizarProduto(produto.id, values);
+      if (resultado.ok === false) {
+        toast.error(resultado.error);
+        return;
+      }
 
       toast.success('Produto atualizado com sucesso!');
+      refresh();
       onOpenChange(false);
     } catch (error) {
       console.error(error);

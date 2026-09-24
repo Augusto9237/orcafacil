@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { atualizarServico } from '@/actions/servicos';
 import { useAuth } from '@/hooks/useAuth';
+import { useDataRefresh } from '@/lib/data-refresh';
 import {
   Sheet,
   SheetContent,
@@ -45,6 +45,7 @@ interface EditarServicoSheetProps {
 
 export function EditarServicoSheet({ servico, open, onOpenChange }: EditarServicoSheetProps) {
   const { usuario } = useAuth();
+  const { refresh } = useDataRefresh();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<any>({
@@ -78,13 +79,14 @@ export function EditarServicoSheet({ servico, open, onOpenChange }: EditarServic
 
     setIsSubmitting(true);
     try {
-      const docRef = doc(db, 'servicos', servico.id);
-      await updateDoc(docRef, {
-        ...values,
-        atualizadoEm: serverTimestamp(),
-      });
+      const resultado = await atualizarServico(servico.id, values);
+      if (resultado.ok === false) {
+        toast.error(resultado.error);
+        return;
+      }
 
       toast.success('Serviço atualizado com sucesso!');
+      refresh();
       onOpenChange(false);
     } catch (error) {
       console.error(error);

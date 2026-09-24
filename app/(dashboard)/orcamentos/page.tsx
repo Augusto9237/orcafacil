@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useOrcamentos } from '@/hooks/useOrcamentos';
 import { useAuth } from '@/hooks/useAuth';
+import { useDataRefresh } from '@/lib/data-refresh';
 import { formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -10,8 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Eye, Pencil, Trash2, Search, Plus } from 'lucide-react';
-import { doc, deleteDoc, updateDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { atualizarStatusOrcamento, excluirOrcamento } from '@/actions/orcamentos';
 import { toast } from 'sonner';
 import {
   Table,
@@ -36,6 +36,7 @@ import { VisualizarOrcamentoDialog } from '@/components/orcamentos/VisualizarOrc
 export default function OrcamentosPage() {
   const { orcamentos, carregando } = useOrcamentos();
   const { perfil } = useAuth();
+  const { refresh } = useDataRefresh();
   const [busca, setBusca] = useState('');
   const [filtroStatus, setFiltroStatus] = useState<string>('todos');
   const [deletandoId, setDeletandoId] = useState<string | null>(null);
@@ -48,9 +49,13 @@ export default function OrcamentosPage() {
   const handleUpdateStatus = async (id: string, newStatus: string) => {
     try {
       setAtualizandoStatus(true);
-      const docRef = doc(db, 'orcamentos', id);
-      await updateDoc(docRef, { status: newStatus });
+      const resultado = await atualizarStatusOrcamento(id, newStatus as any);
+      if (resultado.ok === false) {
+        toast.error(resultado.error);
+        return;
+      }
       toast.success(`Status atualizado com sucesso!`);
+      refresh();
     } catch (err) {
       console.error('Erro ao atualizar status:', err);
       toast.error('Erro ao atualizar status do orçamento.');
@@ -86,8 +91,13 @@ export default function OrcamentosPage() {
   const confirmDelete = async () => {
     if (!deletandoId) return;
     try {
-      await deleteDoc(doc(db, 'orcamentos', deletandoId));
+      const resultado = await excluirOrcamento(deletandoId);
+      if (resultado.ok === false) {
+        toast.error(resultado.error);
+        return;
+      }
       toast.success('Orçamento excluído com sucesso!');
+      refresh();
     } catch (err) {
       console.error('Erro ao excluir orçamento:', err);
       toast.error('Erro ao excluir orçamento.');

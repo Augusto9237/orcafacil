@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useServicos } from '@/hooks/useServicos';
+import { useDataRefresh } from '@/lib/data-refresh';
 import { formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -8,8 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Search, Eye, Pencil, Trash2, CheckCircle2, XCircle, Plus } from 'lucide-react';
 import { NovoServicoSheet } from '@/components/servicos/NovoServicoSheet';
 import { EditarServicoSheet } from '@/components/servicos/EditarServicoSheet';
-import { doc, deleteDoc, updateDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { excluirServico, atualizarStatusServico } from '@/actions/servicos';
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
 import {
@@ -47,6 +47,7 @@ import {
 
 export default function ServicosPage() {
   const { servicos, carregando } = useServicos();
+  const { refresh } = useDataRefresh();
   const [busca, setBusca] = useState('');
   const [statusFiltro, setStatusFiltro] = useState<string>('todos');
 
@@ -64,9 +65,13 @@ export default function ServicosPage() {
   const handleToggleStatus = async (id: string, novoAtivo: boolean, nome: string) => {
     setAtualizandoStatusId(id);
     try {
-      const docRef = doc(db, 'servicos', id);
-      await updateDoc(docRef, { ativo: novoAtivo });
+      const resultado = await atualizarStatusServico(id, novoAtivo);
+      if (resultado.ok === false) {
+        toast.error(resultado.error);
+        return;
+      }
       toast.success(`Serviço "${nome}" ${novoAtivo ? 'ativado' : 'desativado'} com sucesso!`);
+      refresh();
     } catch (error) {
       console.error('Erro ao atualizar status do serviço:', error);
       toast.error('Erro ao atualizar o status do serviço.');
@@ -80,9 +85,13 @@ export default function ServicosPage() {
     if (!excluindoServico) return;
     setExcluindo(true);
     try {
-      const docRef = doc(db, 'servicos', excluindoServico.id);
-      await deleteDoc(docRef);
+      const resultado = await excluirServico(excluindoServico.id);
+      if (resultado.ok === false) {
+        toast.error(resultado.error);
+        return;
+      }
       toast.success('Serviço excluído com sucesso!');
+      refresh();
       setExcluindoServico(null);
     } catch (error) {
       console.error('Erro ao excluir serviço:', error);

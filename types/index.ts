@@ -1,5 +1,3 @@
-import { Timestamp } from 'firebase/firestore';
-
 export type ClienteId = string;
 export type ProdutoId = string;
 export type ServicoId = string;
@@ -17,7 +15,7 @@ export interface Usuario {
   endereco?: string;
   logoUrl?: string;
   corTema?: string;
-  criadoEm: Timestamp | Date;
+  criadoEm: Date;
 }
 
 export interface Cliente {
@@ -36,10 +34,10 @@ export interface Cliente {
     cidade: string;
     estado: string;
     cep: string;
-  };
+  } | string;
   observacoes?: string;
-  criadoEm: Timestamp | Date;
-  atualizadoEm: Timestamp | Date;
+  criadoEm: Date;
+  atualizadoEm: Date;
 }
 
 export interface Produto {
@@ -53,8 +51,8 @@ export interface Produto {
   estoque?: number;
   ativo: boolean;
   imageUrl?: string;
-  criadoEm: Timestamp | Date;
-  atualizadoEm: Timestamp | Date;
+  criadoEm: Date;
+  atualizadoEm: Date;
 }
 
 export interface Servico {
@@ -66,8 +64,8 @@ export interface Servico {
   precoUnitario: number;
   codigoInterno?: string;
   ativo: boolean;
-  criadoEm: Timestamp | Date;
-  atualizadoEm: Timestamp | Date;
+  criadoEm: Date;
+  atualizadoEm: Date;
 }
 
 export type ClienteSnapshot = {
@@ -95,7 +93,7 @@ export interface Orcamento {
   numero: string;
   clienteId: ClienteId;
   cliente: ClienteSnapshot;
-  status: 'rascunho' | 'enviado' | 'aprovado' | 'recusado' | 'expirado';
+  status: 'rascunho' | 'enviado' | 'aprovado' | 'recusado' | 'rejeitado' | 'cancelado' | 'expirado';
   itens: ItemOrcamento[];
   subtotal: number;
   desconto: number;
@@ -105,8 +103,8 @@ export interface Orcamento {
   validadeDias: number;
   condicoesPagamento?: string;
   observacoes?: string;
-  criadoEm: Timestamp | Date;
-  atualizadoEm: Timestamp | Date;
+  criadoEm: Date;
+  atualizadoEm: Date;
 }
 
 export interface OrdemServico {
@@ -124,13 +122,13 @@ export interface OrdemServico {
   descontoTipo: 'percentual' | 'valor';
   impostos: number;
   total: number;
-  dataAbertura: Timestamp | Date;
-  dataPrevisao?: Timestamp | Date;
-  dataConclusao?: Timestamp | Date;
+  dataAbertura: Date;
+  dataPrevisao?: Date;
+  dataConclusao?: Date;
   tecnicoResponsavel?: string;
   condicoesPagamento?: string;
   observacoes?: string;
   assinaturaClienteUrl?: string;
-  criadoEm: Timestamp | Date;
-  atualizadoEm: Timestamp | Date;
+  criadoEm: Date;
+  atualizadoEm: Date;
 }

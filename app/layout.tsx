@@ -2,6 +2,7 @@ import '@/app/globals.css';
 import { Inter } from 'next/font/google';
 import type { Metadata, Viewport } from 'next';
 import { AuthProvider } from '@/hooks/useAuth';
+import { DataRefreshProvider } from '@/lib/data-refresh';
 import { ThemeProvider } from '@/components/theme-provider';
 import { ThemeColorStyle } from '@/components/theme-color-style';
 import { Toaster } from '@/components/ui/sonner';
@@ -51,14 +52,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="pt-BR" suppressHydrationWarning className={cn("font-sans", inter.variable)}>
       <body className="min-h-screen bg-background font-sans antialiased text-foreground">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <AuthProvider>
-            <ThemeColorStyle />
-            <TooltipProvider>
-              {children}
-              <Toaster />
-              <PwaRegister />
-            </TooltipProvider>
-          </AuthProvider>
+          <DataRefreshProvider>
+            <AuthProvider>
+              <ThemeColorStyle />
+              <TooltipProvider>
+                {children}
+                <Toaster />
+                <PwaRegister />
+              </TooltipProvider>
+            </AuthProvider>
+          </DataRefreshProvider>
         </ThemeProvider>
       </body>
     </html>

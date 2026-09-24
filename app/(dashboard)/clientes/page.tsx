@@ -1,13 +1,13 @@
 'use client';
 import { useState } from 'react';
 import { useClientes } from '@/hooks/useClientes';
+import { useDataRefresh } from '@/lib/data-refresh';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { NovoClienteSheet } from '@/components/clientes/NovoClienteSheet';
 import { EditarClienteSheet } from '@/components/clientes/EditarClienteSheet';
-import { deleteDoc, doc } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { excluirCliente } from '@/actions/clientes';
 import { Search, Eye, Pencil, Trash2, Plus, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -56,6 +56,7 @@ const renderEnderecoVal = (endereco?: Cliente['endereco'] | string) => {
 
 export default function ClientesPage() {
   const { clientes, carregando } = useClientes();
+  const { refresh } = useDataRefresh();
   const [busca, setBusca] = useState('');
   const [filtroTipo, setFiltroTipo] = useState('todos');
   
@@ -97,8 +98,13 @@ export default function ClientesPage() {
 
     setIsDeleting(true);
     try {
-      await deleteDoc(doc(db, 'clientes', selectedCliente.id));
+      const resultado = await excluirCliente(selectedCliente.id);
+      if (resultado.ok === false) {
+        toast.error(resultado.error);
+        return;
+      }
       toast.success('Cliente excluído com sucesso!');
+      refresh();
       setIsDeleteOpen(false);
       setSelectedCliente(null);
     } catch (error) {

@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { atualizarCliente } from '@/actions/clientes';
+import { useDataRefresh } from '@/lib/data-refresh';
 import {
   Sheet,
   SheetContent,
@@ -45,6 +45,7 @@ interface EditarClienteSheetProps {
 }
 
 export function EditarClienteSheet({ cliente, open, onOpenChange }: EditarClienteSheetProps) {
+  const { refresh } = useDataRefresh();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<FormValues>({
@@ -86,13 +87,14 @@ export function EditarClienteSheet({ cliente, open, onOpenChange }: EditarClient
 
     setIsSubmitting(true);
     try {
-      const docRef = doc(db, 'clientes', cliente.id);
-      await updateDoc(docRef, {
-        ...values,
-        atualizadoEm: serverTimestamp(),
-      });
+      const resultado = await atualizarCliente(cliente.id, values);
+      if (resultado.ok === false) {
+        toast.error(resultado.error);
+        return;
+      }
 
       toast.success('Cliente atualizado com sucesso!');
+      refresh();
       onOpenChange(false);
     } catch (error) {
       console.error(error);

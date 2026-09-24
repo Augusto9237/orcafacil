@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useProdutos } from '@/hooks/useProdutos';
+import { useDataRefresh } from '@/lib/data-refresh';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
@@ -16,8 +17,7 @@ import { NovoProdutoSheet } from '@/components/produtos/NovoProdutoSheet';
 import { EditarProdutoSheet } from '@/components/produtos/EditarProdutoSheet';
 import { Switch } from '@/components/ui/switch';
 import Link from 'next/link';
-import { doc, deleteDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { excluirProduto, atualizarStatusProduto } from '@/actions/produtos';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -48,6 +48,7 @@ import {
 
 export default function ProdutosPage() {
   const { produtos, carregando } = useProdutos();
+  const { refresh } = useDataRefresh();
   const [busca, setBusca] = useState('');
   const [statusFiltro, setStatusFiltro] = useState<string>('todos');
 
@@ -66,9 +67,13 @@ export default function ProdutosPage() {
     if (!excluindoProduto) return;
     setExcluindo(true);
     try {
-      const docRef = doc(db, 'produtos', excluindoProduto.id);
-      await deleteDoc(docRef);
+      const resultado = await excluirProduto(excluindoProduto.id);
+      if (resultado.ok === false) {
+        toast.error(resultado.error);
+        return;
+      }
       toast.success('Produto excluído com sucesso!');
+      refresh();
       setExcluindoProduto(null);
     } catch (error) {
       console.error('Erro ao excluir produto:', error);
@@ -84,12 +89,13 @@ export default function ProdutosPage() {
   const handleToggleStatus = async (produtoId: string, novoStatus: boolean, nomeProduto: string) => {
     setAtualizandoStatusId(produtoId);
     try {
-      const docRef = doc(db, 'produtos', produtoId);
-      await updateDoc(docRef, {
-        ativo: novoStatus,
-        atualizadoEm: serverTimestamp(),
-      });
+      const resultado = await atualizarStatusProduto(produtoId, novoStatus);
+      if (resultado.ok === false) {
+        toast.error(resultado.error);
+        return;
+      }
       toast.success(`Produto "${nomeProduto}" ${novoStatus ? 'ativado' : 'inativado'} com sucesso!`);
+      refresh();
     } catch (error) {
       console.error('Erro ao atualizar status do produto:', error);
       toast.error('Erro ao alterar o status do produto.');

@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: orcafacil-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: orcafacil
+      POSTGRES_PASSWORD: orcafacil
+      POSTGRES_DB: orcafacil
+    ports:
+      - "5432:5432"
+    volumes:
+      - orcafacil_pgdata:/var/lib/postgresql/data
+
+volumes:
+  orcafacil_pgdata:
