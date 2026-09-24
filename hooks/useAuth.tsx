@@ -1,14 +1,20 @@
 'use client';
 import { useState, useEffect, createContext, useContext } from 'react';
-import { onAuthStateChanged, User, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
-import { auth, db } from '@/lib/firebase/config';
-import { doc, getDoc, setDoc, updateDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
+import { authClient } from '@/lib/auth-client';
+import { atualizarUsuario, garantirUsuario } from '@/actions/usuarios';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Usuario } from '@/types';
 
+export type AuthUser = {
+  id: string;
+  name: string;
+  email: string;
+  image?: string | null;
+};
+
 interface AuthContextType {
-  usuario: User | null;
+  usuario: AuthUser | null;
   perfil: Usuario | null;
   carregando: boolean;
   loginGoogle: () => Promise<void>;
@@ -26,72 +32,71 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [usuario, setUsuario] = useState<User | null>(null);
+  const { data: session, isPending } = authClient.useSession();
   const [perfil, setPerfil] = useState<Usuario | null>(null);
-  const [carregando, setCarregando] = useState(true);
+  const [sincronizandoPerfil, setSincronizandoPerfil] = useState(false);
   const router = useRouter();
 
+  // Better Auth precisa de strictNullChecks para inferir Session; tipamos manualmente.
+  const usuario = (session as { user: AuthUser } | null | undefined)?.user ?? null;
+  const carregando = isPending || sincronizandoPerfil;
+
   useEffect(() => {
-    let unsubscribePerfil = () => {};
+    let cancelado = false;
 
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        // Verifica se é o primeiro login e cria o doc
-        const userDocRef = doc(db, 'usuarios', user.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (!userDoc.exists()) {
-          try {
-            await setDoc(userDocRef, {
-              id: user.uid,
-              nome: user.displayName || 'Usuário Sem Nome',
-              email: user.email,
-              empresa: 'Minha Empresa',
-              criadoEm: serverTimestamp()
-            });
-          } catch(e) {
-             console.error("Erro ao criar usuário: ", e);
-          }
-        }
-
-        // Se inscreve para atualizações em tempo real do perfil do usuário
-        unsubscribePerfil = onSnapshot(userDocRef, (docSnap) => {
-          if (docSnap.exists()) {
-            setPerfil({ id: docSnap.id, ...docSnap.data() } as Usuario);
-          }
-        }, (err) => {
-          console.error("Erro ao carregar perfil do Firestore: ", err);
-        });
-      } else {
+    async function sincronizarPerfil() {
+      if (!usuario) {
         setPerfil(null);
-        unsubscribePerfil();
+        setSincronizandoPerfil(false);
+        return;
       }
-      setUsuario(user);
-      setCarregando(false);
-    });
 
+      setSincronizandoPerfil(true);
+      try {
+        const perfilAtual = await garantirUsuario({
+          id: usuario.id,
+          nome: usuario.name || 'Usuário Sem Nome',
+          email: usuario.email || '',
+        });
+        if (!cancelado) {
+          setPerfil(perfilAtual);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar perfil: ', error);
+        if (!cancelado) {
+          setPerfil(null);
+        }
+      } finally {
+        if (!cancelado) {
+          setSincronizandoPerfil(false);
+        }
+      }
+    }
+
+    sincronizarPerfil();
     return () => {
-      unsubscribe();
-      unsubscribePerfil();
+      cancelado = true;
     };
-  }, []);
+  }, [usuario?.id, usuario?.name, usuario?.email]);
 
   const loginGoogle = async () => {
-    const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
-      toast.success('Login realizado com sucesso!');
-      router.push('/');
-    } catch (error: any) {
-      toast.error('Erro ao fazer login: ' + error.message);
+      await authClient.signIn.social({
+        provider: 'google',
+        callbackURL: '/',
+      });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Erro desconhecido';
+      toast.error('Erro ao fazer login: ' + message);
     }
   };
 
   const logout = async () => {
     try {
-      await signOut(auth);
+      await authClient.signOut();
       router.push('/login');
-    } catch (error) {
-       toast.error('Erro ao sair da conta');
+    } catch {
+      toast.error('Erro ao sair da conta');
     }
   };
 
@@ -101,12 +106,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     try {
-      const userDocRef = doc(db, 'usuarios', usuario.uid);
-      await updateDoc(userDocRef, dados);
+      const resultado = await atualizarUsuario(usuario.id, dados);
+      if (resultado.ok === false) {
+        toast.error(resultado.error);
+        return;
+      }
+      setPerfil(resultado.data);
       toast.success('Configurações salvas com sucesso!');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao atualizar configurações:', error);
-      toast.error('Erro ao salvar configurações: ' + error.message);
+      const message = error instanceof Error ? error.message : 'Erro desconhecido';
+      toast.error('Erro ao salvar configurações: ' + message);
     }
   };
 

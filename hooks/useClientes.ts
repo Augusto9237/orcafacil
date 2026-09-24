@@ -1,41 +1,45 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { listarClientes } from '@/actions/clientes';
 import { useAuth } from '@/hooks/useAuth';
+import { useDataRefresh } from '@/lib/data-refresh';
 import type { Cliente } from '@/types';
 
 export function useClientes() {
   const { usuario } = useAuth();
+  const { version } = useDataRefresh();
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
 
   useEffect(() => {
     if (!usuario) {
-       setCarregando(false);
-       setClientes([]);
-       return;
+      setCarregando(false);
+      setClientes([]);
+      return;
     }
-    const q = query(
-      collection(db, 'clientes'),
-      where('usuarioId', '==', usuario.uid),
-      orderBy('criadoEm', 'desc')
-    );
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        setClientes(snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Cliente)));
-        setCarregando(false);
+
+    let ativo = true;
+    setCarregando(true);
+
+    listarClientes(usuario.id)
+      .then((dados) => {
+        if (!ativo) return;
+        setClientes(dados);
         setErro(null);
-      },
-      (err) => {
+      })
+      .catch((err) => {
+        if (!ativo) return;
         setErro(err.message);
-        setCarregando(false);
-      }
-    );
-    return () => unsubscribe();
-  }, [usuario]);
+      })
+      .finally(() => {
+        if (ativo) setCarregando(false);
+      });
+
+    return () => {
+      ativo = false;
+    };
+  }, [usuario, version]);
 
   return { clientes, carregando, erro };
 }

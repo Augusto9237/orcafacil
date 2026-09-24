@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { criarCliente } from '@/actions/clientes';
 import { useAuth } from '@/hooks/useAuth';
+import { useDataRefresh } from '@/lib/data-refresh';
 import {
   Sheet,
   SheetContent,
@@ -41,6 +41,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export function NovoClienteSheet({ children }: { children: React.ReactNode }) {
   const { usuario } = useAuth();
+  const { refresh } = useDataRefresh();
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -61,14 +62,14 @@ export function NovoClienteSheet({ children }: { children: React.ReactNode }) {
 
     setIsSubmitting(true);
     try {
-      await addDoc(collection(db, 'clientes'), {
-        ...values,
-        usuarioId: usuario.uid,
-        criadoEm: serverTimestamp(),
-        atualizadoEm: serverTimestamp(),
-      });
+      const resultado = await criarCliente(usuario.id, values);
+      if (resultado.ok === false) {
+        toast.error(resultado.error);
+        return;
+      }
 
       toast.success('Cliente cadastrado com sucesso!');
+      refresh();
       form.reset();
       setOpen(false);
     } catch (error) {

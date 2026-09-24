@@ -8,8 +8,8 @@ import { useServicos } from '@/hooks/useServicos';
 import { BuscarProdutoDialog } from '@/components/orcamentos/BuscarProdutoDialog';
 import { BuscarServicoDialog } from '@/components/orcamentos/BuscarServicoDialog';
 import { useOrcamentos } from '@/hooks/useOrcamentos';
-import { addDoc, collection, doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { atualizarOrcamento, buscarOrcamento, criarOrcamento } from '@/actions/orcamentos';
+import { useDataRefresh } from '@/lib/data-refresh';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -57,6 +57,7 @@ function NovoOrcamentoPageContent() {
   const editId = searchParams.get('edit');
 
   const { usuario } = useAuth();
+  const { refresh } = useDataRefresh();
   const { clientes, carregando: loadingClientes } = useClientes();
   const { orcamentos } = useOrcamentos();
 
@@ -94,15 +95,13 @@ function NovoOrcamentoPageContent() {
     if (!editId) return;
     async function loadOrcamento() {
       try {
-        const docRef = doc(db, 'orcamentos', editId);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
+        const data = await buscarOrcamento(editId);
+        if (data) {
           setClienteId(data.clienteId || '');
           setValidadDias(data.validadeDias || 15);
           setCondicoesPagamento(data.condicoesPagamento || 'À vista');
           setObservacoes(data.observacoes || '');
-          setStatus(data.status || 'rascunho');
+          setStatus(data.status === 'enviado' ? 'enviado' : 'rascunho');
           setItens(data.itens || []);
           setDesconto(data.desconto || 0);
           setDescontoTipo(data.descontoTipo || 'valor');
@@ -198,56 +197,38 @@ function NovoOrcamentoPageContent() {
         }
       }
 
-      if (editId) {
-        await updateDoc(doc(db, 'orcamentos', editId), {
-          clienteId: clienteId,
-          cliente: {
-            nome: selectedCliente.nome,
-            email: selectedCliente.email || '',
-            telefone: selectedCliente.telefone,
-            cpfCnpj: selectedCliente.cpfCnpj || '',
-            endereco: addressSnapshot,
-          },
-          status: status,
-          itens: itens,
-          subtotal: subtotal,
-          desconto: desconto,
-          descontoTipo: descontoTipo,
-          impostos: impostos,
-          total: total,
-          validadeDias: validadDias,
-          condicoesPagamento: condicoesPagamento,
-          observacoes: observacoes,
-          atualizadoEm: serverTimestamp(),
-        });
-        toast.success('Orçamento atualizado com sucesso!');
-      } else {
-        await addDoc(collection(db, 'orcamentos'), {
-          usuarioId: usuario.uid,
-          numero: suggestedNumber,
-          clienteId: clienteId,
-          cliente: {
-            nome: selectedCliente.nome,
-            email: selectedCliente.email || '',
-            telefone: selectedCliente.telefone,
-            cpfCnpj: selectedCliente.cpfCnpj || '',
-            endereco: addressSnapshot,
-          },
-          status: status,
-          itens: itens,
-          subtotal: subtotal,
-          desconto: desconto,
-          descontoTipo: descontoTipo,
-          impostos: impostos,
-          total: total,
-          validadeDias: validadDias,
-          condicoesPagamento: condicoesPagamento,
-          observacoes: observacoes,
-          criadoEm: serverTimestamp(),
-          atualizadoEm: serverTimestamp(),
-        });
-        toast.success('Orçamento gerado e salvo com sucesso!');
+      const payload = {
+        clienteId,
+        cliente: {
+          nome: selectedCliente.nome,
+          email: selectedCliente.email || '',
+          telefone: selectedCliente.telefone,
+          cpfCnpj: selectedCliente.cpfCnpj || '',
+          endereco: addressSnapshot,
+        },
+        status,
+        itens,
+        subtotal,
+        desconto,
+        descontoTipo,
+        impostos,
+        total,
+        validadeDias: validadDias,
+        condicoesPagamento,
+        observacoes,
+      };
+
+      const resultado = editId
+        ? await atualizarOrcamento(editId, payload)
+        : await criarOrcamento(usuario.id, payload);
+
+      if (resultado.ok === false) {
+        toast.error(resultado.error);
+        return;
       }
+
+      toast.success(editId ? 'Orçamento atualizado com sucesso!' : 'Orçamento gerado e salvo com sucesso!');
+      refresh();
 
       router.push('/orcamentos');
     } catch (error) {

@@ -1,0 +1,266 @@
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TipoPessoa {
+  pessoa_fisica
+  pessoa_juridica
+}
+
+enum StatusOrcamento {
+  rascunho
+  enviado
+  aprovado
+  recusado
+  rejeitado
+  cancelado
+  expirado
+}
+
+enum StatusOS {
+  aberta
+  em_andamento
+  pausada
+  concluida
+  cancelada
+}
+
+enum PrioridadeOS {
+  baixa
+  normal
+  alta
+  urgente
+}
+
+enum TipoDesconto {
+  percentual
+  valor
+}
+
+model Usuario {
+  id       String   @id
+  nome     String
+  email    String
+  empresa  String   @default("Minha Empresa")
+  cnpjCpf  String?
+  telefone String?
+  endereco String?
+  logoUrl  String?
+  corTema  String?
+  criadoEm DateTime @default(now())
+
+  clientes        Cliente[]
+  produtos        Produto[]
+  servicos        Servico[]
+  orcamentos      Orcamento[]
+  ordensDeServico OrdemServico[]
+  contador        Contador?
+
+  @@map("usuarios")
+}
+
+model Contador {
+  usuarioId    String  @id
+  seqOrcamento Int     @default(0)
+  seqOs        Int     @default(0)
+  usuario      Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@map("contadores")
+}
+
+model Cliente {
+  id           String     @id @default(cuid())
+  usuarioId    String
+  nome         String
+  email        String?
+  telefone     String
+  cpfCnpj      String?
+  tipo         TipoPessoa
+  endereco     String?
+  observacoes  String?
+  criadoEm     DateTime   @default(now())
+  atualizadoEm DateTime   @updatedAt
+
+  usuario         Usuario        @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  orcamentos      Orcamento[]
+  ordensDeServico OrdemServico[]
+
+  @@index([usuarioId, criadoEm])
+  @@map("clientes")
+}
+
+model Produto {
+  id            String   @id @default(cuid())
+  usuarioId     String
+  nome          String
+  descricao     String?
+  unidade       String
+  precoUnitario Decimal  @db.Decimal(12, 2)
+  codigoInterno String?
+  estoque       Int      @default(0)
+  ativo         Boolean  @default(true)
+  imageUrl      String?
+  criadoEm      DateTime @default(now())
+  atualizadoEm  DateTime @updatedAt
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId, criadoEm])
+  @@map("produtos")
+}
+
+model Servico {
+  id            String   @id @default(cuid())
+  usuarioId     String
+  nome          String
+  descricao     String?
+  unidade       String
+  precoUnitario Decimal  @db.Decimal(12, 2)
+  codigoInterno String?
+  ativo         Boolean  @default(true)
+  criadoEm      DateTime @default(now())
+  atualizadoEm  DateTime @updatedAt
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId, criadoEm])
+  @@map("servicos")
+}
+
+model Orcamento {
+  id                 String          @id @default(cuid())
+  usuarioId          String
+  numero             String
+  clienteId          String
+  clienteNome        String
+  clienteEmail       String?
+  clienteTelefone    String
+  clienteCpfCnpj     String?
+  clienteEndereco    String?
+  status             StatusOrcamento @default(rascunho)
+  itens              Json
+  subtotal           Decimal         @db.Decimal(12, 2)
+  desconto           Decimal         @default(0) @db.Decimal(12, 2)
+  descontoTipo       TipoDesconto    @default(valor)
+  impostos           Decimal         @default(0) @db.Decimal(12, 2)
+  total              Decimal         @db.Decimal(12, 2)
+  validadeDias       Int             @default(15)
+  condicoesPagamento String?
+  observacoes        String?
+  criadoEm           DateTime        @default(now())
+  atualizadoEm       DateTime        @updatedAt
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  cliente Cliente @relation(fields: [clienteId], references: [id], onDelete: Restrict)
+
+  @@unique([usuarioId, numero])
+  @@index([usuarioId, criadoEm])
+  @@map("orcamentos")
+}
+
+model OrdemServico {
+  id                   String       @id @default(cuid())
+  usuarioId            String
+  numero               String
+  orcamentoId          String?
+  clienteId            String
+  clienteNome          String
+  clienteEmail         String?
+  clienteTelefone      String
+  clienteCpfCnpj       String?
+  clienteEndereco      String?
+  status               StatusOS     @default(aberta)
+  prioridade           PrioridadeOS @default(normal)
+  itens                Json
+  subtotal             Decimal      @db.Decimal(12, 2)
+  desconto             Decimal      @default(0) @db.Decimal(12, 2)
+  descontoTipo         TipoDesconto @default(valor)
+  impostos             Decimal      @default(0) @db.Decimal(12, 2)
+  total                Decimal      @db.Decimal(12, 2)
+  dataAbertura         DateTime     @default(now())
+  dataPrevisao         DateTime?
+  dataConclusao        DateTime?
+  tecnicoResponsavel   String?
+  condicoesPagamento   String?
+  observacoes          String?
+  assinaturaClienteUrl String?
+  criadoEm             DateTime     @default(now())
+  atualizadoEm         DateTime     @updatedAt
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  cliente Cliente @relation(fields: [clienteId], references: [id], onDelete: Restrict)
+
+  @@unique([usuarioId, numero])
+  @@index([usuarioId, criadoEm])
+  @@map("ordens_de_servico")
+}
+
+// Better Auth
+model User {
+  id            String    @id
+  name          String
+  email         String
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}

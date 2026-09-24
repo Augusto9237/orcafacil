@@ -1,41 +1,45 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { listarOrcamentos } from '@/actions/orcamentos';
 import { useAuth } from '@/hooks/useAuth';
+import { useDataRefresh } from '@/lib/data-refresh';
 import type { Orcamento } from '@/types';
 
 export function useOrcamentos() {
   const { usuario } = useAuth();
+  const { version } = useDataRefresh();
   const [orcamentos, setOrcamentos] = useState<Orcamento[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
 
   useEffect(() => {
     if (!usuario) {
-       setCarregando(false);
-       setOrcamentos([]);
-       return;
+      setCarregando(false);
+      setOrcamentos([]);
+      return;
     }
-    const q = query(
-      collection(db, 'orcamentos'),
-      where('usuarioId', '==', usuario.uid),
-      orderBy('criadoEm', 'desc')
-    );
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        setOrcamentos(snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Orcamento)));
-        setCarregando(false);
+
+    let ativo = true;
+    setCarregando(true);
+
+    listarOrcamentos(usuario.id)
+      .then((dados) => {
+        if (!ativo) return;
+        setOrcamentos(dados);
         setErro(null);
-      },
-      (err) => {
+      })
+      .catch((err) => {
+        if (!ativo) return;
         setErro(err.message);
-        setCarregando(false);
-      }
-    );
-    return () => unsubscribe();
-  }, [usuario]);
+      })
+      .finally(() => {
+        if (ativo) setCarregando(false);
+      });
+
+    return () => {
+      ativo = false;
+    };
+  }, [usuario, version]);
 
   return { orcamentos, carregando, erro };
 }
