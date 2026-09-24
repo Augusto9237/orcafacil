@@ -50,18 +50,18 @@ export function VisualizarOrcamentoDialog({
   };
 
   const getStatusBadge = (status: string) => {
-    const configs: Record<string, { label: string; classes: string }> = {
-      rascunho: { label: 'Rascunho', classes: 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300' },
-      enviado: { label: 'Enviado', classes: 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-200/50 dark:border-blue-900/30' },
-      aprovado: { label: 'Aprovado', classes: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-950/30' },
-      recusado: { label: 'Recusado', classes: 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border border-rose-200/50 dark:border-rose-950/30' },
-      rejeitado: { label: 'Rejeitado', classes: 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border border-rose-200/50 dark:border-rose-950/30' },
-      cancelado: { label: 'Cancelado', classes: 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200/50 dark:border-amber-950/30' },
-      expirado: { label: 'Expirado', classes: 'bg-orange-50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300 border border-orange-200/50 dark:border-orange-950/30' },
+    const configs: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" | "ghost" }> = {
+      rascunho: { label: 'Rascunho', variant: 'secondary' },
+      enviado: { label: 'Enviado', variant: 'outline' },
+      aprovado: { label: 'Aprovado', variant: 'default' },
+      recusado: { label: 'Recusado', variant: 'destructive' },
+      rejeitado: { label: 'Rejeitado', variant: 'destructive' },
+      cancelado: { label: 'Cancelado', variant: 'ghost' },
+      expirado: { label: 'Expirado', variant: 'outline' },
     };
-    const config = configs[status] || { label: status, classes: 'bg-zinc-100 text-zinc-800' };
+    const config = configs[status] || { label: status, variant: 'secondary' };
     return (
-      <Badge className={config.classes}>
+      <Badge variant={config.variant}>
         {config.label}
       </Badge>
     );
